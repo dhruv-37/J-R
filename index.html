@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investment Banking — Valuation & Modeling Guides</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:      #EAEEEA;
+    --paper-2:    #F5F7F3;
+    --panel:      #FFFFFF;
+    --ink:        #1A211C;
+    --ink-soft:   #4C574D;
+    --muted:      #7B857D;
+    --line:       #D3DAD1;
+    --line-soft:  #E1E6DD;
+    --accent:     #245C4B;
+    --accent-ink: #FFFFFF;
+    --accent-soft:#DCE9E2;
+    --gold:       #9C7A32;
+    --gold-soft:  #F1E7CE;
+    --rust:       #9C4A34;
+    --rust-soft:  #F3E1DA;
+    --shadow:     0 1px 2px rgba(20,30,22,.06), 0 8px 24px rgba(20,30,22,.05);
+    --radius:     3px;
+  }
+
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --paper:      #12160F;
+      --paper-2:    #171C15;
+      --panel:      #1B211A;
+      --ink:        #EAEFE8;
+      --ink-soft:   #B7C1B4;
+      --muted:      #7F8A7D;
+      --line:       #2A322A;
+      --line-soft:  #232A21;
+      --accent:     #6FBE9F;
+      --accent-ink: #0E1310;
+      --accent-soft:#1F3D33;
+      --gold:       #D3B15F;
+      --gold-soft:  #332A15;
+      --rust:       #D98E75;
+      --rust-soft:  #3A241C;
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:      #12160F;
+    --paper-2:    #171C15;
+    --panel:      #1B211A;
+    --ink:        #EAEFE8;
+    --ink-soft:   #B7C1B4;
+    --muted:      #7F8A7D;
+    --line:       #2A322A;
+    --line-soft:  #232A21;
+    --accent:     #6FBE9F;
+    --accent-ink: #0E1310;
+    --accent-soft:#1F3D33;
+    --gold:       #D3B15F;
+    --gold-soft:  #332A15;
+    --rust:       #D98E75;
+    --rust-soft:  #3A241C;
+    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a{ color: var(--accent); text-decoration:none; }
+  .serif{ font-family:'Source Serif 4', Georgia, serif; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+
+  header.top{
+    border-bottom: 1px solid var(--line);
+    background: var(--paper-2);
+  }
+  .top-inner{
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 22px 28px;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .brand-mark{
+    width:34px;height:34px;
+    border:1.5px solid var(--accent);
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--accent);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    font-weight:600;
+  }
+  .brand-text{
+    font-family:'IBM Plex Mono',monospace;
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .edition-pill{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color: var(--gold);
+    background: var(--gold-soft);
+    border:1px solid var(--gold);
+    border-radius: 999px;
+    padding: 4px 12px;
+  }
+
+  main{
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 72px 28px 100px;
+  }
+
+  .hero{
+    text-align:center;
+    margin-bottom: 76px;
+  }
+  .hero .kicker{
+    font-family:'IBM Plex Mono',monospace;
+    font-size: 12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  .hero h1{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 600;
+    line-height: 1.15;
+    margin: 0 0 20px;
+    color: var(--ink);
+  }
+  .hero .subtitle{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-style: italic;
+    font-size: 19px;
+    color: var(--ink-soft);
+    margin: 0 0 8px;
+  }
+  .hero .authors{
+    font-family:'IBM Plex Mono',monospace;
+    font-size: 12.5px;
+    letter-spacing:.04em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 14px;
+  }
+  .divider{
+    width: 60px;
+    height: 2px;
+    background: var(--accent);
+    margin: 28px auto;
+  }
+
+  .cards{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 26px;
+  }
+  @media (max-width: 760px){
+    .cards{ grid-template-columns: 1fr; }
+  }
+
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 36px 32px;
+    display:flex;
+    flex-direction:column;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    position: relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:3px;
+    background: var(--accent);
+  }
+  .card.gold::before{ background: var(--gold); }
+  .card:hover{
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: 0 4px 6px rgba(20,30,22,.08), 0 14px 32px rgba(20,30,22,.10);
+  }
+
+  .card .tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 999px;
+    padding: 4px 11px;
+    display:inline-block;
+    width: fit-content;
+    margin-bottom: 18px;
+  }
+  .card.gold .tag{
+    color: var(--gold);
+    background: var(--gold-soft);
+  }
+
+  .card .num{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .card h2{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-size: 25px;
+    font-weight: 600;
+    margin: 0 0 14px;
+    color: var(--ink);
+    line-height:1.25;
+  }
+
+  .card p{
+    color: var(--ink-soft);
+    font-size: 15px;
+    margin: 0 0 26px;
+    flex-grow: 1;
+  }
+
+  .card .topics{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+  .card .topics span{
+    font-family:'IBM Plex Mono',monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--paper-2);
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    padding: 4px 9px;
+  }
+
+  .card .go{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size: 13px;
+    font-weight:600;
+    color: var(--accent-ink);
+    background: var(--accent);
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    width: fit-content;
+    letter-spacing: .02em;
+    transition: opacity .15s ease;
+  }
+  .card.gold .go{
+    background: var(--gold);
+  }
+  .card .go:hover{ opacity: .88; }
+  .card .go svg{ width:14px; height:14px; }
+
+  footer{
+    text-align:center;
+    padding: 40px 28px 60px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <div class="brand-mark">J&amp;R</div>
+      <div class="brand-text">Investment Banking — Valuation &amp; Deal Analysis</div>
+    </div>
+    <div class="edition-pill">3rd Edition</div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="kicker">Working Guides for Practitioners</div>
+    <h1>Investment Banking</h1>
+    <p class="subtitle">Valuation, Leveraged Buyouts, and Mergers &amp; Acquisitions</p>
+    <p class="authors">Joshua Rosenbaum &amp; Joshua Pearl · Third Edition</p>
+    <div class="divider"></div>
+  </section>
+
+  <section class="cards">
+    <a class="card" href="cca.html" style="color:inherit;">
+      <span class="tag">Chapter 1</span>
+      <div class="num">01</div>
+      <h2>Comparable Companies Analysis</h2>
+      <p>A step-by-step working guide to selecting a peer universe, spreading trading multiples, and framing valuation using the public markets.</p>
+      <div class="topics">
+        <span>Peer selection</span>
+        <span>Trading multiples</span>
+        <span>EV / EBITDA</span>
+        <span>Benchmarking</span>
+      </div>
+      <div class="go">Open the guide
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </div>
+    </a>
+
+    <a class="card gold" href="precedent-transactions.html" style="color:inherit;">
+      <span class="tag">Chapter 2</span>
+      <div class="num">02</div>
+      <h2>Precedent Transaction Analysis</h2>
+      <p>Building a precedent transaction analysis from start to finish — screening deals, spreading transaction multiples, and reading control premiums.</p>
+      <div class="topics">
+        <span>Deal screening</span>
+        <span>Transaction multiples</span>
+        <span>Control premium</span>
+        <span>M&amp;A comps</span>
+      </div>
+      <div class="go">Open the guide
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </div>
+    </a>
+  </section>
+</main>
+
+<footer>
+  Based on <em>Investment Banking: Valuation, LBOs, M&amp;A, and IPOs</em> — Joshua Rosenbaum &amp; Joshua Pearl, 3rd Edition
+</footer>
+
+</body>
+</html>

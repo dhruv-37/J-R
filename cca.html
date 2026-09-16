@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparable Companies Analysis — A Working Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:      #EAEEEA;
+    --paper-2:    #F5F7F3;
+    --panel:      #FFFFFF;
+    --ink:        #1A211C;
+    --ink-soft:   #4C574D;
+    --muted:      #7B857D;
+    --line:       #D3DAD1;
+    --line-soft:  #E1E6DD;
+    --accent:     #245C4B;
+    --accent-ink: #FFFFFF;
+    --accent-soft:#DCE9E2;
+    --gold:       #9C7A32;
+    --gold-soft:  #F1E7CE;
+    --rust:       #9C4A34;
+    --rust-soft:  #F3E1DA;
+    --shadow:     0 1px 2px rgba(20,30,22,.06), 0 8px 24px rgba(20,30,22,.05);
+    --radius:     3px;
+  }
+
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --paper:      #12160F;
+      --paper-2:    #171C15;
+      --panel:      #1B211A;
+      --ink:        #EAEFE8;
+      --ink-soft:   #B7C1B4;
+      --muted:      #7F8A7D;
+      --line:       #2A322A;
+      --line-soft:  #232A21;
+      --accent:     #6FBE9F;
+      --accent-ink: #0E1310;
+      --accent-soft:#1F3D33;
+      --gold:       #D3B15F;
+      --gold-soft:  #332A15;
+      --rust:       #D98E75;
+      --rust-soft:  #3A241C;
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:      #12160F;
+    --paper-2:    #171C15;
+    --panel:      #1B211A;
+    --ink:        #EAEFE8;
+    --ink-soft:   #B7C1B4;
+    --muted:      #7F8A7D;
+    --line:       #2A322A;
+    --line-soft:  #232A21;
+    --accent:     #6FBE9F;
+    --accent-ink: #0E1310;
+    --accent-soft:#1F3D33;
+    --gold:       #D3B15F;
+    --gold-soft:  #332A15;
+    --rust:       #D98E75;
+    --rust-soft:  #3A241C;
+    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection{ background: var(--accent-soft); }
+
+  h1,h2,h3,h4{
+    font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+  }
+  .mono{
+    font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  a{ color: var(--accent); }
+  button{ font-family: inherit; }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position: sticky; top:0; z-index: 50;
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 16px;
+    padding: 12px 28px;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-brand{ display:flex; align-items:baseline; gap:10px; }
+  .topbar-brand .mark{
+    font-family:'Source Serif 4', serif; font-weight:700; font-size: 15px;
+    letter-spacing: .01em;
+  }
+  .topbar-brand .sub{ font-size:12px; color: var(--muted); }
+  .topbar-progress{ display:flex; align-items:center; gap:10px; min-width: 220px; }
+  .topbar-progress .track{
+    flex:1; height:6px; border-radius: 4px; background: var(--line-soft);
+    overflow:hidden;
+  }
+  .topbar-progress .fill{
+    height:100%; width:0%; background: var(--accent);
+    transition: width .35s ease;
+  }
+  .topbar-progress .pct{ font-family:'IBM Plex Mono',monospace; font-size:12px; color: var(--ink-soft); min-width: 34px; text-align:right; }
+  .reset-btn{
+    border:1px solid var(--line); background: transparent; color: var(--ink-soft);
+    font-size: 12px; padding: 6px 10px; border-radius: var(--radius); cursor:pointer;
+  }
+  .reset-btn:hover{ border-color: var(--muted); color: var(--ink); }
+
+  /* ---------- hero ---------- */
+  .hero{
+    max-width: 1180px; margin: 0 auto; padding: 56px 28px 40px;
+    display:grid; grid-template-columns: 1.35fr 1fr; gap: 48px; align-items:end;
+  }
+  .hero h1{ font-size: 40px; line-height:1.12; max-width: 15ch; }
+  .hero .lede{
+    margin-top: 16px; color: var(--ink-soft); font-size: 16px; max-width: 56ch;
+  }
+  .hero-stat{
+    background: var(--panel); border:1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 20px; box-shadow: var(--shadow);
+  }
+  .hero-stat .ring-row{ display:flex; align-items:center; gap:16px; }
+  .hero-stat .num{ font-family:'IBM Plex Mono',monospace; font-size:30px; font-weight:600; }
+  .hero-stat .label{ font-size:12px; color: var(--muted); margin-top: 2px; }
+  .hero-stat .steps-mini{ margin-top:14px; display:flex; gap:6px; }
+  .hero-stat .steps-mini span{
+    flex:1; height:5px; border-radius:3px; background: var(--line-soft);
+  }
+  .hero-stat .steps-mini span.done{ background: var(--accent); }
+
+  /* ---------- layout ---------- */
+  .layout{
+    max-width: 1180px; margin: 0 auto; padding: 0 28px 120px;
+    display:grid; grid-template-columns: 240px 1fr; gap: 48px;
+    align-items:start;
+  }
+  nav.rail{
+    position: sticky; top: 74px;
+    display:flex; flex-direction:column; gap: 2px;
+    border-left: 1px solid var(--line);
+    padding-left: 18px;
+  }
+  nav.rail .rail-item{
+    display:block; padding: 11px 0; cursor:pointer;
+    border:none; background:none; text-align:left; width:100%;
+    color: var(--muted); position:relative;
+  }
+  nav.rail .rail-item::before{
+    content:""; position:absolute; left:-19px; top: 15px; width:7px; height:7px;
+    border-radius:50%; background: var(--line); border: 2px solid var(--paper);
+  }
+  nav.rail .rail-item.active{ color: var(--ink); }
+  nav.rail .rail-item.active::before{ background: var(--accent); }
+  nav.rail .rail-item.complete::before{ background: var(--gold); }
+  nav.rail .r-num{ font-family:'IBM Plex Mono',monospace; font-size:11px; color: var(--muted); display:block; }
+  nav.rail .r-name{ font-size:14px; font-weight:500; display:block; margin-top:2px; }
+  nav.rail .r-pct{ font-family:'IBM Plex Mono',monospace; font-size:11px; color: var(--muted); display:block; margin-top:2px;}
+
+  main{ min-width:0; }
+
+  section.step{
+    padding: 46px 0 54px;
+    border-bottom: 1px solid var(--line);
+  }
+  section.step:last-child{ border-bottom:none; }
+
+  .step-head{ display:flex; gap: 18px; align-items:flex-start; }
+  .step-badge{
+    font-family:'IBM Plex Mono',monospace; font-size: 13px; color: var(--accent);
+    border:1px solid var(--accent); border-radius: 50%;
+    width: 34px; height:34px; display:flex; align-items:center; justify-content:center;
+    flex: none;
+  }
+  .step-head h2{ font-size: 25px; }
+  .step-tag{
+    font-size: 12px; color: var(--ink-soft); margin-top: 5px;
+  }
+
+  .step-body{ margin-top: 20px; margin-left: 52px; }
+  .step-body > p{ color: var(--ink-soft); max-width: 68ch; }
+
+  .grid-2{ display:grid; grid-template-columns: 1fr; gap: 30px; margin-top: 26px; }
+
+  .panel{
+    background: var(--panel); border:1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px 22px;
+  }
+  .panel h4{ font-size: 12px; text-transform: none; letter-spacing:.01em; color: var(--ink-soft); font-family:'Inter',sans-serif; font-weight:600; }
+
+  .checklist{ list-style:none; margin: 14px 0 0; padding:0; display:flex; flex-direction:column; gap: 2px; }
+  .checklist li{ border-top: 1px solid var(--line-soft); }
+  .checklist li:first-child{ border-top:none; }
+  .checklist label{
+    display:flex; gap: 12px; align-items:flex-start; padding: 11px 2px; cursor:pointer;
+  }
+  .checklist input[type=checkbox]{
+    appearance:none; -webkit-appearance:none; width:17px; height:17px; margin-top:2px;
+    border:1.5px solid var(--muted); border-radius: 3px; flex:none; position:relative; cursor:pointer;
+    background: var(--panel);
+  }
+  .checklist input[type=checkbox]:checked{ background: var(--accent); border-color: var(--accent); }
+  .checklist input[type=checkbox]:checked::after{
+    content:""; position:absolute; left:4px; top:1px; width:5px; height:9px;
+    border: solid var(--accent-ink); border-width: 0 2px 2px 0; transform: rotate(40deg);
+  }
+  .checklist .txt{ font-size:14.5px; line-height:1.45; color: var(--ink); }
+  .checklist input:checked ~ .txt{ color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+
+  .callout{
+    border-left: 3px solid var(--gold); background: var(--gold-soft);
+    padding: 12px 16px; border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 13.5px; color: var(--ink-soft); margin-top:16px;
+  }
+  .callout b{ color: var(--ink); }
+  .callout.warn{ border-left-color: var(--rust); background: var(--rust-soft); }
+
+  .formula{
+    font-family:'IBM Plex Mono',monospace; font-size: 13px; background: var(--paper-2);
+    border:1px solid var(--line); border-radius: var(--radius); padding: 12px 14px;
+    margin-top: 10px; color: var(--ink); overflow-x:auto; white-space:pre;
+  }
+
+  table.ledger{ width:100%; border-collapse: collapse; margin-top: 12px; font-size: 12.5px; }
+  table.ledger caption{ text-align:left; font-size:11px; color:var(--muted); margin-bottom:6px; }
+  table.ledger th, table.ledger td{
+    padding: 7px 8px; border-bottom: 1px solid var(--line-soft); text-align:right; white-space:nowrap;
+  }
+  table.ledger th:first-child, table.ledger td:first-child,
+  table.ledger th:nth-child(2), table.ledger td:nth-child(2){ text-align:left; white-space:normal; }
+  table.ledger thead th{ color: var(--muted); font-weight:600; font-size:11px; border-bottom:1px solid var(--line); }
+  table.ledger tbody tr:hover{ background: var(--paper-2); }
+  table.ledger tbody tr.tier td{ font-weight:600; background: var(--paper-2); color: var(--ink-soft); }
+  table.ledger tfoot td{ font-weight:600; border-top: 1px solid var(--line); border-bottom:none; }
+  table.ledger td.num, table.ledger th.num{ font-family:'IBM Plex Mono',monospace; }
+  .scrollx{ overflow-x:auto; }
+
+  .tag-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 14px; }
+  .tag{
+    font-size:11.5px; padding: 4px 9px; border-radius: 20px; border:1px solid var(--line);
+    color: var(--ink-soft); background: var(--paper-2);
+  }
+
+  .source-list{ margin: 12px 0 0; padding-left: 18px; color: var(--ink-soft); font-size: 13.5px; }
+  .source-list li{ margin-bottom: 4px; }
+
+  svg text{ font-family:'IBM Plex Mono', monospace; }
+
+  footer{
+    max-width: 1180px; margin: 0 auto; padding: 28px 28px 60px; color: var(--muted); font-size:12.5px;
+    border-top: 1px solid var(--line);
+  }
+
+  @media (max-width: 860px){
+    .hero{ grid-template-columns: 1fr; padding-top: 34px; }
+    .layout{ grid-template-columns: 1fr; }
+    nav.rail{
+      position: static; flex-direction:row; overflow-x:auto; border-left:none;
+      padding-left:0; border-bottom:1px solid var(--line); padding-bottom: 10px; gap: 18px;
+    }
+    nav.rail .rail-item{ flex:none; padding: 4px 0; }
+    nav.rail .rail-item::before{ left:-12px; top: 7px; }
+    .step-body{ margin-left: 0; }
+    .hero h1{ font-size:30px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <span class="mark">Comparable Companies</span>
+    <span class="sub">a working guide</span>
+  </div>
+  <div class="topbar-progress">
+    <div class="track"><div class="fill" id="topFill"></div></div>
+    <span class="pct mono" id="topPct">0%</span>
+    <button class="reset-btn" id="resetBtn" title="Clear all checked items">Reset</button>
+  </div>
+</div>
+
+<div class="hero">
+  <div>
+    <h1>Building a comparable companies analysis, start to finish</h1>
+    <p class="lede">Trading comps value a company by looking at how the public market prices similar businesses today — turning a peer set's share prices into a defensible multiple range for the company in front of you. This guide walks the five stages bankers use to get there, with the checklist, formulas, and layout of a real working model (ValueCo / Gasparro Corp.) built into each one.</p>
+  </div>
+  <div class="hero-stat">
+    <div class="ring-row">
+      <div>
+        <div class="num mono"><span id="doneCount">0</span>/<span id="totalCount">0</span></div>
+        <div class="label">tasks completed</div>
+      </div>
+    </div>
+    <div class="steps-mini" id="stepsMini"></div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="rail" id="rail"></nav>
+
+  <main id="main">
+
+    <!-- STEP 1 -->
+    <section class="step" id="step-1" data-step="1">
+      <div class="step-head">
+        <div class="step-badge">1</div>
+        <div>
+          <h2>Select the universe of comparable companies</h2>
+          <div class="step-tag">Study the target first — the peer list falls out of that story</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>Before you can find comparables, you have to know the target cold: its sector, products, customers, distribution, and geography, alongside size, profitability, growth, returns, and credit profile. Companies that share those traits trade on similar logic — so the peer list is really a byproduct of understanding the business, not a separate research task.</p>
+
+        <div class="grid-2">
+          <div class="panel">
+            <h4>Checklist</h4>
+            <ul class="checklist" data-step="1">
+              <li><label><input type="checkbox" data-id="s1-1"><span class="txt">Study the target's business profile — sector/sub-sector, products &amp; services, customers &amp; end markets, distribution channels, geography</span></label></li>
+              <li><label><input type="checkbox" data-id="s1-2"><span class="txt">Study the target's financial profile — size, profitability, growth, return on investment, credit profile</span></label></li>
+              <li><label><input type="checkbox" data-id="s1-3"><span class="txt">Pull the target's public competitors from its 10-K, proxy statement, and investor presentations</span></label></li>
+              <li><label><input type="checkbox" data-id="s1-4"><span class="txt">Check equity research initiating-coverage reports for the analyst's own stated comparables</span></label></li>
+              <li><label><input type="checkbox" data-id="s1-5"><span class="txt">Screen by SIC/NAICS or other industry codes to catch any peers the qualitative search missed</span></label></li>
+              <li><label><input type="checkbox" data-id="s1-6"><span class="txt">Sanity-check the list with a senior banker or sector expert before finalizing</span></label></li>
+              <li><label><input type="checkbox" data-id="s1-7"><span class="txt">If no direct peers exist, widen the lens to companies sharing the same underlying business drivers</span></label></li>
+              <li><label><input type="checkbox" data-id="s1-8"><span class="txt">Tier the working list by sub-sector and size — e.g. specialty vs. commodity vs. small-cap</span></label></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h4>What the working list looks like</h4>
+            <div class="scrollx">
+              <table class="ledger">
+                <caption>Illustrative — "List" tab of the model</caption>
+                <thead>
+                  <tr><th>Company</th><th>Ticker</th><th class="num">Equity Value</th><th class="num">Enterprise Value</th><th class="num">LTM Sales</th><th class="num">LTM EBITDA</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>BuyerCo</td><td class="mono">BUY</td><td class="num">9,800</td><td class="num">11,600</td><td class="num">6,560</td><td class="num">1,443</td></tr>
+                  <tr><td>Falloon Group</td><td class="mono">FLN</td><td class="num">7,480</td><td class="num">11,254</td><td class="num">11,835</td><td class="num">1,636</td></tr>
+                  <tr><td>Sherman Co.</td><td class="mono">SHR</td><td class="num">5,600</td><td class="num">8,101</td><td class="num">5,895</td><td class="num">1,047</td></tr>
+                  <tr><td>Pearl Corp.</td><td class="mono">PRL</td><td class="num">5,172</td><td class="num">5,804</td><td class="num">4,284</td><td class="num">839</td></tr>
+                  <tr><td>Gasparro Corp.</td><td class="mono">JDG</td><td class="num">5,000</td><td class="num">6,750</td><td class="num">4,725</td><td class="num">900</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="callout">A broad initial list is fine — you can tier or de-emphasize outliers later once real data disagrees with the screen. What you shouldn't do is add a company back in just because its multiple is convenient.</div>
+          </div>
+        </div>
+
+        <div class="tag-row">
+          <span class="tag">Sub-sector beats sector</span>
+          <span class="tag">Business profile before financial profile</span>
+          <span class="tag">Tier, don't just cut, the outliers</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2 -->
+    <section class="step" id="step-2" data-step="2">
+      <div class="step-head">
+        <div class="step-badge">2</div>
+        <div>
+          <h2>Locate the necessary financial information</h2>
+          <div class="step-tag">Every multiple you calculate has to trace back to a filing or a consensus estimate</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>With the universe set, gather the historical and estimated financials each comparable's multiples will be built from. Historical statistics come from SEC filings; forward-looking figures come from consensus research estimates — and the two sources shouldn't be mixed within the same analysis.</p>
+
+        <div class="grid-2">
+          <div class="panel">
+            <h4>Checklist</h4>
+            <ul class="checklist" data-step="2">
+              <li><label><input type="checkbox" data-id="s2-1"><span class="txt">Pull each company's latest 10-K for annual income statement, balance sheet, and disclosure detail</span></label></li>
+              <li><label><input type="checkbox" data-id="s2-2"><span class="txt">Pull the latest 10-Q(s) for the current and prior stub periods needed to build LTM</span></label></li>
+              <li><label><input type="checkbox" data-id="s2-3"><span class="txt">Check recent 8-Ks / press releases for updates not yet reflected in the 10-K or 10-Q</span></label></li>
+              <li><label><input type="checkbox" data-id="s2-4"><span class="txt">Pull the most recent proxy statement (DEF 14A) for the latest basic shares outstanding</span></label></li>
+              <li><label><input type="checkbox" data-id="s2-5"><span class="txt">Source consensus estimates (one provider only, applied consistently) for forward sales, EBITDA, EBIT, and EPS</span></label></li>
+              <li><label><input type="checkbox" data-id="s2-6"><span class="txt">Pull current share price, 52-week high/low, and most recent quarterly dividend</span></label></li>
+              <li><label><input type="checkbox" data-id="s2-7"><span class="txt">Pull balance sheet debt, cash, preferred stock, and noncontrolling interest as of the latest quarter</span></label></li>
+              <li><label><input type="checkbox" data-id="s2-8"><span class="txt">Pull options/warrants and convertible securities detail from the 10-K/10-Q for diluted share count</span></label></li>
+              <li><label><input type="checkbox" data-id="s2-9"><span class="txt">Note each company's credit ratings from the rating agencies' websites</span></label></li>
+              <li><label><input type="checkbox" data-id="s2-10"><span class="txt">Log every source document and as-of date for an audit trail</span></label></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h4>Where each input comes from</h4>
+            <div style="margin-top:10px;">
+              <div style="font-size:13px; font-weight:600;">Income statement &amp; estimates</div>
+              <ul class="source-list">
+                <li>Sales, gross profit, EBITDA, EBIT, net income — most recent 10-K, 10-Q, 8-K, press release</li>
+                <li>Forward sales / EBITDA / EBIT / EPS — Bloomberg, Refinitiv IBES, S&amp;P Capital IQ, Thomson First Call, or equity research</li>
+              </ul>
+              <div style="font-size:13px; font-weight:600; margin-top:14px;">Balance sheet, cash flow &amp; shares</div>
+              <ul class="source-list">
+                <li>Cash, debt, shareholders' equity — most recent 10-K, 10-Q, 8-K, press release</li>
+                <li>D&amp;A and capex — most recent 10-K, 10-Q, 8-K, press release</li>
+                <li>Basic shares outstanding — 10-K, 10-Q, or proxy, whichever is most recent</li>
+                <li>Options and warrants — 10-K or 10-Q, whichever is more recent</li>
+              </ul>
+              <div style="font-size:13px; font-weight:600; margin-top:14px;">Market data</div>
+              <ul class="source-list">
+                <li>Share price, 52-week high/low, dividend — financial information service</li>
+                <li>Credit ratings — Moody's, S&amp;P, Fitch websites</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout warn"><b>Don't mix sources mid-stream.</b> Pick one consensus-estimate provider and stick with it across the whole comp set — switching providers between companies quietly changes what you're comparing.</div>
+      </div>
+    </section>
+
+    <!-- STEP 3 -->
+    <section class="step" id="step-3" data-step="3">
+      <div class="step-head">
+        <div class="step-badge">3</div>
+        <div>
+          <h2>Spread key statistics, ratios, and trading multiples</h2>
+          <div class="step-tag">One input page per company — this is where the model does its work</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>Each comparable gets its own input page: market valuation and general company info on one side, the reported and adjusted income statement rebuilt to an LTM basis on the other, and a set of calculations that turn raw filings into equity value, enterprise value, margins, growth rates, return ratios, credit ratios, and trading multiples.</p>
+
+        <div class="grid-2">
+          <div class="panel">
+            <h4>Checklist</h4>
+            <ul class="checklist" data-step="3">
+              <li><label><input type="checkbox" data-id="s3-1"><span class="txt">Calculate fully diluted shares — treasury stock method for options/warrants, if-converted or net share settlement for convertibles</span></label></li>
+              <li><label><input type="checkbox" data-id="s3-2"><span class="txt">Calculate equity value (share price × fully diluted shares) and % of 52-week high</span></label></li>
+              <li><label><input type="checkbox" data-id="s3-3"><span class="txt">Bridge equity value to enterprise value (+ debt, + preferred, + NCI, − cash)</span></label></li>
+              <li><label><input type="checkbox" data-id="s3-4"><span class="txt">Build LTM financials: prior full year, minus prior-year stub, plus current-year stub</span></label></li>
+              <li><label><input type="checkbox" data-id="s3-5"><span class="txt">Calendarize any company whose fiscal year doesn't end in December so periods line up across the set</span></label></li>
+              <li><label><input type="checkbox" data-id="s3-6"><span class="txt">Adjust for non-recurring items (asset sales, write-offs, restructuring) with matching tax adjustments</span></label></li>
+              <li><label><input type="checkbox" data-id="s3-7"><span class="txt">Calculate profitability margins — gross profit, EBITDA, EBIT, net income, each as a % of sales</span></label></li>
+              <li><label><input type="checkbox" data-id="s3-8"><span class="txt">Calculate historical and estimated growth rates for sales, EBITDA, and EPS</span></label></li>
+              <li><label><input type="checkbox" data-id="s3-9"><span class="txt">Calculate return ratios — ROIC, ROE, ROA, and dividend yield</span></label></li>
+              <li><label><input type="checkbox" data-id="s3-10"><span class="txt">Calculate credit ratios — debt/total cap, debt/EBITDA, net debt/EBITDA, EBITDA/interest, EBIT/interest</span></label></li>
+              <li><label><input type="checkbox" data-id="s3-11"><span class="txt">Calculate trading multiples — EV/Sales, EV/EBITDA, EV/EBIT, P/E — on LTM and forward-year bases</span></label></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h4>The two formulas the page turns on</h4>
+            <div class="formula">LTM period  =  Prior full year
+              − Prior-year stub (same months)
+              + Current-year stub (same months)</div>
+            <div class="formula">Enterprise value  =  Equity value
+              + Total debt
+              + Preferred stock
+              + Noncontrolling interest
+              − Cash &amp; equivalents</div>
+            <svg viewBox="0 -12 460 214" width="100%" height="auto" role="img" aria-label="Enterprise value bridge diagram" style="margin-top:14px;">
+              <style>
+                .bar-label{ font-size:10.5px; fill: var(--ink-soft); }
+                .bar-val{ font-size:11px; font-weight:600; fill: var(--ink); }
+              </style>
+              <line x1="20" y1="150" x2="440" y2="150" stroke="var(--line)" stroke-width="1"/>
+              <rect x="20" y="70" width="55" height="80" fill="var(--accent)" opacity="0.85" rx="2"/>
+              <text x="47" y="58" text-anchor="middle" class="bar-label">Equity</text>
+              <text x="47" y="114" text-anchor="middle" class="bar-val" fill="white">EqV</text>
+              <line x1="75" y1="70" x2="90" y2="70" stroke="var(--line)" stroke-dasharray="2,2"/>
+              <rect x="90" y="55" width="55" height="15" fill="var(--gold)" rx="2"/>
+              <text x="117" y="43" text-anchor="middle" class="bar-label">+ Debt</text>
+              <line x1="145" y1="55" x2="160" y2="55" stroke="var(--line)" stroke-dasharray="2,2"/>
+              <rect x="160" y="47" width="55" height="8" fill="var(--gold)" opacity="0.75" rx="2"/>
+              <text x="187" y="35" text-anchor="middle" class="bar-label">+ Pref.</text>
+              <line x1="215" y1="47" x2="230" y2="47" stroke="var(--line)" stroke-dasharray="2,2"/>
+              <rect x="230" y="42" width="55" height="5" fill="var(--gold)" opacity="0.55" rx="2"/>
+              <text x="257" y="30" text-anchor="middle" class="bar-label">+ NCI</text>
+              <line x1="285" y1="42" x2="300" y2="42" stroke="var(--line)" stroke-dasharray="2,2"/>
+              <rect x="300" y="42" width="55" height="6" fill="var(--rust)" opacity="0.8" rx="2"/>
+              <text x="327" y="30" text-anchor="middle" class="bar-label">− Cash</text>
+              <line x1="355" y1="48" x2="370" y2="48" stroke="var(--line)" stroke-dasharray="2,2"/>
+              <rect x="370" y="48" width="60" height="102" fill="var(--ink)" opacity="0.9" rx="2"/>
+              <text x="400" y="36" text-anchor="middle" class="bar-label">Enterprise Value</text>
+              <text x="400" y="103" text-anchor="middle" class="bar-val" fill="var(--paper)">EV</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:0;">
+          <div class="panel">
+            <h4>Worked example — Gasparro Corp. (JDG)</h4>
+            <div class="scrollx">
+              <table class="ledger">
+                <caption>Enterprise value build, 12/20/2019</caption>
+                <tbody>
+                  <tr><td>Current share price</td><td></td><td class="num">$50.00</td></tr>
+                  <tr><td>Fully diluted shares</td><td></td><td class="num">100.0</td></tr>
+                  <tr><td><b>Equity value</b></td><td></td><td class="num"><b>$5,000.0</b></td></tr>
+                  <tr><td>Plus: total debt</td><td></td><td class="num">1,850.0</td></tr>
+                  <tr><td>Less: cash &amp; equivalents</td><td></td><td class="num">(100.0)</td></tr>
+                  <tr><td><b>Enterprise value</b></td><td></td><td class="num"><b>$6,750.0</b></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="callout" style="margin-top:14px;">Three non-recurring items were normalized out of Gasparro's LTM: a $25M gain on an asset sale, a $30M inventory write-off, and a $15M restructuring charge — each footnoted with its own tax adjustment at the 25% marginal rate.</div>
+          </div>
+          <div class="panel">
+            <h4>Resulting trading multiples</h4>
+            <div class="scrollx">
+              <table class="ledger">
+                <caption>Gasparro Corp. — LTM 9/30/2019</caption>
+                <thead>
+                  <tr><th>Multiple</th><th class="num">LTM</th><th class="num">2019E</th><th class="num">2020E</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>EV / Sales</td><td class="num">1.4x</td><td class="num">1.4x</td><td class="num">1.3x</td></tr>
+                  <tr><td>EV / EBITDA</td><td class="num">7.5x</td><td class="num">7.1x</td><td class="num">6.6x</td></tr>
+                  <tr><td>EV / EBIT</td><td class="num">9.3x</td><td class="num">8.8x</td><td class="num">8.2x</td></tr>
+                  <tr><td>P / E</td><td class="num">10.7x</td><td class="num">9.8x</td><td class="num">9.1x</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout warn"><b>Judgment calls need footnotes.</b> Non-recurring adjustments rely on the banker's own judgment about what's truly one-off — write down the source and reasoning behind every add-back so the decision can be reviewed and defended later.</div>
+      </div>
+    </section>
+
+    <!-- STEP 4 -->
+    <section class="step" id="step-4" data-step="4">
+      <div class="step-head">
+        <div class="step-badge">4</div>
+        <div>
+          <h2>Benchmark the comparable companies</h2>
+          <div class="step-tag">Put every peer on one page and let the target's relative position show itself</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>With every comparable spread the same way, lay out their financial statistics and ratios alongside the target's in spreadsheet form. This benchmarking exercise determines the target's relative ranking, identifies its closest comparables, and flags the outliers — informing how the peer set gets tiered before you touch a single multiple.</p>
+
+        <div class="grid-2">
+          <div class="panel">
+            <h4>Checklist</h4>
+            <ul class="checklist" data-step="4">
+              <li><label><input type="checkbox" data-id="s4-1"><span class="txt">Lay every comparable's size, profitability, growth, and market valuation stats on one output page next to the target</span></label></li>
+              <li><label><input type="checkbox" data-id="s4-2"><span class="txt">Lay every comparable's return-on-investment and credit ratios on a second output page next to the target</span></label></li>
+              <li><label><input type="checkbox" data-id="s4-3"><span class="txt">Calculate mean and median for every statistic and ratio column, by tier and overall</span></label></li>
+              <li><label><input type="checkbox" data-id="s4-4"><span class="txt">Identify the target's closest comparables based on where it lands on the benchmarking pages</span></label></li>
+              <li><label><input type="checkbox" data-id="s4-5"><span class="txt">Flag outliers (unusually high/low margins, size, or leverage) and understand the company-specific reason behind each</span></label></li>
+              <li><label><input type="checkbox" data-id="s4-6"><span class="txt">Group the comparables into tiers by sub-sector and size rather than discarding outliers outright</span></label></li>
+              <li><label><input type="checkbox" data-id="s4-7"><span class="txt">Build the trading multiples output page — EV/Sales, EV/EBITDA, EV/EBIT, P/E across LTM and forward years, by tier</span></label></li>
+              <li><label><input type="checkbox" data-id="s4-8"><span class="txt">Calculate mean, median, high, and low for each multiple column, by tier and overall</span></label></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h4>The trading multiples ledger</h4>
+            <div class="scrollx">
+              <table class="ledger">
+                <caption>Illustrative — "Output" tab, Tier I: Specialty Chemicals</caption>
+                <thead>
+                  <tr><th>Company</th><th>Ticker</th><th class="num">EV/Sales</th><th class="num">EV/EBITDA</th><th class="num">EV/EBIT</th><th class="num">P/E</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>BuyerCo</td><td class="mono">BUY</td><td class="num">1.6x</td><td class="num">8.0x</td><td class="num">9.1x</td><td class="num">11.5x</td></tr>
+                  <tr><td>Sherman Co.</td><td class="mono">SHR</td><td class="num">1.4x</td><td class="num">7.7x</td><td class="num">10.8x</td><td class="num">13.1x</td></tr>
+                  <tr><td>Pearl Corp.</td><td class="mono">PRL</td><td class="num">1.3x</td><td class="num">6.9x</td><td class="num">9.3x</td><td class="num">12.2x</td></tr>
+                  <tr><td>Gasparro Corp.</td><td class="mono">JDG</td><td class="num">1.4x</td><td class="num">7.5x</td><td class="num">9.3x</td><td class="num">10.7x</td></tr>
+                  <tr><td>Kumra Inc.</td><td class="mono">KUM</td><td class="num">1.7x</td><td class="num">8.0x</td><td class="num">10.6x</td><td class="num">11.8x</td></tr>
+                </tbody>
+                <tfoot>
+                  <tr><td>Mean</td><td></td><td class="num">1.5x</td><td class="num">7.6x</td><td class="num">9.8x</td><td class="num">11.9x</td></tr>
+                  <tr><td>Median</td><td></td><td class="num">1.4x</td><td class="num">7.7x</td><td class="num">9.3x</td><td class="num">11.8x</td></tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout">Benchmarking, combined with the business-profile review from Step 1, is what actually identifies the target's closest comps and its outliers — for ValueCo, that meant BuyerCo, Gasparro, and Sherman sat closest, while McMenamin (profitability) and Adler (size) were flagged as less relevant without being thrown out.</div>
+      </div>
+    </section>
+
+    <!-- STEP 5 -->
+    <section class="step" id="step-5" data-step="5">
+      <div class="step-head">
+        <div class="step-badge">5</div>
+        <div>
+          <h2>Determine the valuation</h2>
+          <div class="step-tag">Turn the benchmarked multiples into a range for the company you're actually valuing</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>The benchmarked multiples only matter once they're applied back to the target's own financials. Select the multiple(s) and range that best reflect the target's positioning within the peer set, apply them to the target's own metrics, and bridge the result back to an implied enterprise value, equity value, and — for a public target — a per-share price.</p>
+
+        <div class="grid-2">
+          <div class="panel">
+            <h4>Checklist</h4>
+            <ul class="checklist" data-step="5">
+              <li><label><input type="checkbox" data-id="s5-1"><span class="txt">Choose the primary multiple(s) for the sector — typically EV/EBITDA, with EV/Sales, EV/EBIT, and P/E as cross-checks</span></label></li>
+              <li><label><input type="checkbox" data-id="s5-2"><span class="txt">Select the reference range based on the target's relative positioning — full tier range, or a tightened band around the closest comps</span></label></li>
+              <li><label><input type="checkbox" data-id="s5-3"><span class="txt">Apply the range to the target's own LTM and forward-year financial metrics</span></label></li>
+              <li><label><input type="checkbox" data-id="s5-4"><span class="txt">Calculate implied enterprise value = financial metric × selected multiple range</span></label></li>
+              <li><label><input type="checkbox" data-id="s5-5"><span class="txt">Bridge implied enterprise value to implied equity value (− debt, − preferred, − NCI, + cash)</span></label></li>
+              <li><label><input type="checkbox" data-id="s5-6"><span class="txt">Divide by fully diluted shares to get an implied per-share value, where the target is public</span></label></li>
+              <li><label><input type="checkbox" data-id="s5-7"><span class="txt">Cross-check the P/E-implied equity value against the EV/EBITDA-implied range for consistency</span></label></li>
+              <li><label><input type="checkbox" data-id="s5-8"><span class="txt">Plot the resulting range on a football field alongside precedent transactions and DCF</span></label></li>
+              <li><label><input type="checkbox" data-id="s5-9"><span class="txt">Weigh comps' pros (market-based, current, quick) against its cons (sentiment-driven, no true pure-plays, disconnect from cash flow) before leaning on it too heavily</span></label></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h4>From multiple to per-share value</h4>
+            <div class="formula">Implied EV        =  Target LTM/forward metric  ×  Selected multiple range
+Implied equity value  =  Implied EV − Debt − Pref. − NCI + Cash
+Implied per-share value =  Implied equity value  ÷  Diluted shares</div>
+            <div class="scrollx" style="margin-top:14px;">
+              <table class="ledger">
+                <caption>Illustrative — valuation implied by P/E (equity value)</caption>
+                <thead>
+                  <tr><th>Metric</th><th class="num">Net income</th><th class="num">Multiple range</th><th class="num">Implied equity value</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>LTM</td><td class="num">$70</td><td class="num">13.0x – 16.0x</td><td class="num">$910 – $1,120</td></tr>
+                  <tr><td>2019E</td><td class="num">$75</td><td class="num">12.0x – 15.0x</td><td class="num">$900 – $1,125</td></tr>
+                  <tr><td>2020E</td><td class="num">$80</td><td class="num">11.0x – 14.0x</td><td class="num">$880 – $1,120</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <svg viewBox="0 -8 460 140" width="100%" height="auto" role="img" aria-label="Football field valuation range" style="margin-top:14px;">
+              <text x="180" y="14" class="bar-label" text-anchor="middle">Low</text>
+              <text x="360" y="14" class="bar-label" text-anchor="middle">High</text>
+              <line x1="150" y1="30" x2="290" y2="30" stroke="var(--gold)" stroke-width="8" stroke-linecap="round"/>
+              <text x="10" y="30" class="bar-label" dominant-baseline="middle">Trading comps</text>
+
+              <line x1="180" y1="60" x2="360" y2="60" stroke="var(--accent)" stroke-width="8" stroke-linecap="round"/>
+              <text x="10" y="60" class="bar-label" dominant-baseline="middle">Precedent transactions</text>
+
+              <line x1="165" y1="90" x2="325" y2="90" stroke="var(--muted)" stroke-width="8" stroke-linecap="round"/>
+              <text x="10" y="90" class="bar-label" dominant-baseline="middle">Discounted cash flow</text>
+
+              <line x1="245" y1="18" x2="245" y2="100" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3,3"/>
+              <text x="245" y="114" text-anchor="middle" class="bar-label">current price</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="callout warn"><b>Comps sets the floor, not the whole picture.</b> Trading comps tends to sit tighter and lower than precedent transactions, since it carries no control premium — treat a wide gap between the two as a prompt to revisit assumptions, not as license to average them into one number.</div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  Built as a practical companion to the standard sell-side / advisory workflow for comparable companies analysis, based on the Rosenbaum &amp; Pearl framework. Progress is stored only in this browser — nothing here leaves your device.
+</footer>
+
+<script>
+(function(){
+  var STEPS = [
+    {id:1, name:"Select the universe"},
+    {id:2, name:"Locate the data"},
+    {id:3, name:"Spread the multiples"},
+    {id:4, name:"Benchmark the peers"},
+    {id:5, name:"Determine valuation"}
+  ];
+  var STORE_KEY = "cca-guide-progress-v1";
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    }catch(e){ return {}; }
+  }
+  function saveState(state){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  var state = loadState();
+  var allBoxes = Array.prototype.slice.call(document.querySelectorAll('.checklist input[type=checkbox]'));
+
+  allBoxes.forEach(function(box){
+    var id = box.getAttribute('data-id');
+    if(state[id]) box.checked = true;
+    box.addEventListener('change', function(){
+      state[id] = box.checked;
+      saveState(state);
+      render();
+    });
+  });
+
+  var rail = document.getElementById('rail');
+  STEPS.forEach(function(s){
+    var btn = document.createElement('button');
+    btn.className = 'rail-item';
+    btn.setAttribute('data-target', 'step-' + s.id);
+    btn.innerHTML = '<span class="r-num mono">Step ' + s.id + '</span>' +
+                    '<span class="r-name">' + s.name + '</span>' +
+                    '<span class="r-pct mono" data-pct-for="'+s.id+'">0%</span>';
+    btn.addEventListener('click', function(){
+      var el = document.getElementById('step-' + s.id);
+      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    rail.appendChild(btn);
+  });
+
+  var stepsMini = document.getElementById('stepsMini');
+  STEPS.forEach(function(s){
+    var span = document.createElement('span');
+    span.setAttribute('data-mini-for', s.id);
+    stepsMini.appendChild(span);
+  });
+
+  function render(){
+    var total = allBoxes.length;
+    var done = allBoxes.filter(function(b){ return b.checked; }).length;
+    document.getElementById('doneCount').textContent = done;
+    document.getElementById('totalCount').textContent = total;
+    var pct = total ? Math.round(done/total*100) : 0;
+    document.getElementById('topFill').style.width = pct + '%';
+    document.getElementById('topPct').textContent = pct + '%';
+
+    STEPS.forEach(function(s){
+      var boxes = document.querySelectorAll('.checklist[data-step="'+s.id+'"] input[type=checkbox]');
+      var t = boxes.length;
+      var d = Array.prototype.filter.call(boxes, function(b){return b.checked;}).length;
+      var p = t ? Math.round(d/t*100) : 0;
+      var railItem = document.querySelector('.rail-item[data-target="step-'+s.id+'"]');
+      var pctLabel = railItem ? railItem.querySelector('[data-pct-for="'+s.id+'"]') : null;
+      if(pctLabel) pctLabel.textContent = p + '%';
+      if(railItem){
+        railItem.classList.toggle('complete', p === 100);
+      }
+      var mini = document.querySelector('[data-mini-for="'+s.id+'"]');
+      if(mini) mini.classList.toggle('done', p === 100);
+    });
+  }
+
+  var sections = STEPS.map(function(s){ return document.getElementById('step-' + s.id); });
+  function onScroll(){
+    var pos = window.scrollY + 140;
+    var activeId = sections[0] ? sections[0].id : null;
+    sections.forEach(function(sec){
+      if(sec && sec.offsetTop <= pos) activeId = sec.id;
+    });
+    document.querySelectorAll('.rail-item').forEach(function(item){
+      item.classList.toggle('active', item.getAttribute('data-target') === activeId);
+    });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    if(!confirm('Clear all checked steps? This cannot be undone.')) return;
+    allBoxes.forEach(function(b){ b.checked = false; });
+    state = {};
+    saveState(state);
+    render();
+  });
+
+  render();
+  onScroll();
+})();
+</script>
+
+</body>
+</html>
