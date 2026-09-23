@@ -128,6 +128,46 @@
     border-radius: 999px;
     padding: 4px 12px;
   }
+  .header-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .header-socials{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .header-social-link{
+    width: 30px;
+    height: 30px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border: 1px solid rgba(36, 92, 75, 0.26);
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(36, 92, 75, 0.12), rgba(36, 92, 75, 0.22));
+    color: var(--accent);
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.22);
+  }
+  .header-social-link:hover{
+    background: linear-gradient(135deg, rgba(156, 122, 50, 0.12), rgba(156, 122, 50, 0.2));
+    border-color: rgba(156, 122, 50, 0.34);
+    color: var(--gold);
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 3px rgba(156, 122, 50, 0.08);
+  }
+  .header-social-link.gmail:hover{
+    background: linear-gradient(135deg, rgba(156, 122, 50, 0.12), rgba(156, 122, 50, 0.2));
+    border-color: rgba(156, 122, 50, 0.34);
+    color: var(--gold);
+  }
+  .header-social-link svg{
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
 
   main{
     max-width: 1040px;
@@ -290,6 +330,42 @@
   .card .go:hover{ opacity: .88; }
   .card .go svg{ width:14px; height:14px; }
 
+  .socials{
+    display:flex;
+    justify-content:center;
+    gap:16px;
+    margin-top: 34px;
+  }
+  .social-link{
+    width: 52px;
+    height: 52px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: 50%;
+    color: var(--ink-soft);
+    box-shadow: var(--shadow);
+    transition: transform .15s ease, border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .social-link:hover{
+    transform: translateY(-2px);
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .social-link.gmail:hover{
+    background: var(--gold-soft);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .social-link svg{
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+  }
+
   footer{
     text-align:center;
     padding: 40px 28px 60px;
@@ -308,7 +384,21 @@
       <div class="brand-mark">J&amp;R</div>
       <div class="brand-text">Investment Banking — Valuation &amp; Deal Analysis</div>
     </div>
-    <div class="edition-pill">3rd Edition</div>
+    <div class="header-actions">
+      <div class="edition-pill">3rd Edition</div>
+      <div class="header-socials" aria-label="Social links">
+        <a class="header-social-link" href="https://www.linkedin.com/in/dhruv-kumar-a05b75292/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6.94 8.5A1.56 1.56 0 1 1 6.94 5.39a1.56 1.56 0 0 1 0 3.11ZM5.13 18.01h3.13V9.71H5.13v8.3Zm4.9-8.3h3.01v1.13h.04c.42-.8 1.44-1.64 2.96-1.64 3.17 0 3.75 2.08 3.75 4.78v4.03h-3.12v-3.77c0-1.13-.02-2.59-1.58-2.59-1.58 0-1.82 1.23-1.82 2.5v3.86H10.03V9.71Z"/>
+          </svg>
+        </a>
+        <a class="header-social-link gmail" href="mailto:dhruvkumar19072005@gmail.com" aria-label="Email">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 6.75A2.75 2.75 0 0 1 5.75 4h12.5A2.75 2.75 0 0 1 21 6.75v10.5A2.75 2.75 0 0 1 18.25 20H5.75A2.75 2.75 0 0 1 3 17.25V6.75Zm2.1-.25 6.9 5.18 6.9-5.18H5.1Zm14.15 1.38-7.05 5.3a1 1 0 0 1-1.2 0L4.75 7.88v9.37c0 .41.34.75.75.75h12.99c.41 0 .75-.34.75-.75V7.88Z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -354,6 +444,19 @@
       </div>
     </a>
   </section>
+
+  <div class="socials" aria-label="Social media links">
+    <a class="social-link" href="https://www.linkedin.com/in/dhruv-kumar-a05b75292/" target="_blank" rel="noopener noreferrer" aria-label="Visit LinkedIn profile">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6.94 8.5A1.56 1.56 0 1 1 6.94 5.39a1.56 1.56 0 0 1 0 3.11ZM5.13 18.01h3.13V9.71H5.13v8.3Zm4.9-8.3h3.01v1.13h.04c.42-.8 1.44-1.64 2.96-1.64 3.17 0 3.75 2.08 3.75 4.78v4.03h-3.12v-3.77c0-1.13-.02-2.59-1.58-2.59-1.58 0-1.82 1.23-1.82 2.5v3.86H10.03V9.71Z"/>
+      </svg>
+    </a>
+    <a class="social-link gmail" href="mailto:dhruvkumar19072005@gmail.com" aria-label="Email Dhruv Kumar">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 6.75A2.75 2.75 0 0 1 5.75 4h12.5A2.75 2.75 0 0 1 21 6.75v10.5A2.75 2.75 0 0 1 18.25 20H5.75A2.75 2.75 0 0 1 3 17.25V6.75Zm2.1-.25 6.9 5.18 6.9-5.18H5.1Zm14.15 1.38-7.05 5.3a1 1 0 0 1-1.2 0L4.75 7.88v9.37c0 .41.34.75.75.75h12.99c.41 0 .75-.34.75-.75V7.88Z"/>
+      </svg>
+    </a>
+  </div>
 </main>
 
 <footer>
