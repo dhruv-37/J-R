@@ -105,6 +105,9 @@
     border-bottom: 1px solid var(--line);
   }
   .topbar-brand{ display:flex; align-items:baseline; gap:10px; }
+  .site-nav{ display:flex; align-items:center; gap:5px; }
+  .site-nav a{ color:var(--ink-soft); font-size:12px; font-weight:600; padding:7px 9px; border:1px solid transparent; border-radius:var(--radius); white-space:nowrap; }
+  .site-nav a:hover,.site-nav a[aria-current="page"]{ color:var(--accent); background:var(--accent-soft); border-color:var(--line); }
   .topbar-brand .mark{
     font-family:'Source Serif 4', serif; font-weight:700; font-size: 15px;
     letter-spacing: .01em;
@@ -275,6 +278,10 @@
   }
 
   @media (max-width: 860px){
+    .topbar{ flex-wrap:wrap; padding:12px 18px; }
+    .topbar-brand{ flex:1; }
+    .site-nav{ order:3; flex-basis:100%; justify-content:center; overflow-x:auto; }
+    .topbar-progress{ min-width:0; flex:1; max-width:240px; }
     .hero{ grid-template-columns: 1fr; padding-top: 34px; }
     .layout{ grid-template-columns: 1fr; }
     nav.rail{
@@ -295,6 +302,11 @@
     <span class="mark">Precedent Transactions</span>
     <span class="sub">a working guide</span>
   </div>
+  <nav class="site-nav" aria-label="Main navigation">
+    <a href="index.html">Home</a>
+    <a href="valuation-methodologies.html" aria-current="page">Valuation Methods</a>
+    <a href="notes.html">Notes</a>
+  </nav>
   <div class="topbar-progress">
     <div class="track"><div class="fill" id="topFill"></div></div>
     <span class="pct mono" id="topPct">0%</span>

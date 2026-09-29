@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discounted Cash Flow Analysis — A Working Guide</title>
+<link rel="icon" type="image/png" href="money.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --paper:      #EAEEEA;
+    --paper-2:    #F5F7F3;
+    --panel:      #FFFFFF;
+    --ink:        #1A211C;
+    --ink-soft:   #4C574D;
+    --muted:      #7B857D;
+    --line:       #D3DAD1;
+    --line-soft:  #E1E6DD;
+    --accent:     #245C4B;
+    --accent-ink: #FFFFFF;
+    --accent-soft:#DCE9E2;
+    --gold:       #9C7A32;
+    --gold-soft:  #F1E7CE;
+    --rust:       #9C4A34;
+    --rust-soft:  #F3E1DA;
+    --shadow:     0 1px 2px rgba(20,30,22,.06), 0 8px 24px rgba(20,30,22,.05);
+    --radius:     3px;
+  }
+
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --paper:      #12160F;
+      --paper-2:    #171C15;
+      --panel:      #1B211A;
+      --ink:        #EAEFE8;
+      --ink-soft:   #B7C1B4;
+      --muted:      #7F8A7D;
+      --line:       #2A322A;
+      --line-soft:  #232A21;
+      --accent:     #6FBE9F;
+      --accent-ink: #0E1310;
+      --accent-soft:#1F3D33;
+      --gold:       #D3B15F;
+      --gold-soft:  #332A15;
+      --rust:       #D98E75;
+      --rust-soft:  #3A241C;
+      --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:      #12160F;
+    --paper-2:    #171C15;
+    --panel:      #1B211A;
+    --ink:        #EAEFE8;
+    --ink-soft:   #B7C1B4;
+    --muted:      #7F8A7D;
+    --line:       #2A322A;
+    --line-soft:  #232A21;
+    --accent:     #6FBE9F;
+    --accent-ink: #0E1310;
+    --accent-soft:#1F3D33;
+    --gold:       #D3B15F;
+    --gold-soft:  #332A15;
+    --rust:       #D98E75;
+    --rust-soft:  #3A241C;
+    --shadow:     0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection{ background: var(--accent-soft); }
+
+  h1,h2,h3,h4{
+    font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0;
+  }
+  .mono{
+    font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  a{ color: var(--accent); }
+  button{ font-family: inherit; }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position: sticky; top:0; z-index: 50;
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 16px;
+    padding: 12px 28px;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-brand{ display:flex; align-items:baseline; gap:10px; }
+  .site-nav{ display:flex; align-items:center; gap:5px; }
+  .site-nav a{ color:var(--ink-soft); font-size:12px; font-weight:600; padding:7px 9px; border:1px solid transparent; border-radius:var(--radius); white-space:nowrap; }
+  .site-nav a:hover,.site-nav a[aria-current="page"]{ color:var(--accent); background:var(--accent-soft); border-color:var(--line); }
+  .topbar-brand .mark{
+    font-family:'Source Serif 4', serif; font-weight:700; font-size: 15px;
+    letter-spacing: .01em;
+  }
+  .topbar-brand .sub{ font-size:12px; color: var(--muted); }
+  .topbar-progress{ display:flex; align-items:center; gap:10px; min-width: 220px; }
+  .topbar-progress .track{
+    flex:1; height:6px; border-radius: 4px; background: var(--line-soft);
+    overflow:hidden;
+  }
+  .topbar-progress .fill{
+    height:100%; width:0%; background: var(--accent);
+    transition: width .35s ease;
+  }
+  .topbar-progress .pct{ font-family:'IBM Plex Mono',monospace; font-size:12px; color: var(--ink-soft); min-width: 34px; text-align:right; }
+  .reset-btn{
+    border:1px solid var(--line); background: transparent; color: var(--ink-soft);
+    font-size: 12px; padding: 6px 10px; border-radius: var(--radius); cursor:pointer;
+  }
+  .reset-btn:hover{ border-color: var(--muted); color: var(--ink); }
+
+  /* ---------- hero ---------- */
+  .hero{
+    max-width: 1180px; margin: 0 auto; padding: 56px 28px 40px;
+    display:grid; grid-template-columns: 1.35fr 1fr; gap: 48px; align-items:end;
+  }
+  .hero h1{ font-size: 40px; line-height:1.12; max-width: 15ch; }
+  .hero .lede{
+    margin-top: 16px; color: var(--ink-soft); font-size: 16px; max-width: 56ch;
+  }
+  .hero-stat{
+    background: var(--panel); border:1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 20px; box-shadow: var(--shadow);
+  }
+  .hero-stat .ring-row{ display:flex; align-items:center; gap:16px; }
+  .hero-stat .num{ font-family:'IBM Plex Mono',monospace; font-size:30px; font-weight:600; }
+  .hero-stat .label{ font-size:12px; color: var(--muted); margin-top: 2px; }
+  .hero-stat .steps-mini{ margin-top:14px; display:flex; gap:6px; }
+  .hero-stat .steps-mini span{
+    flex:1; height:5px; border-radius:3px; background: var(--line-soft);
+  }
+  .hero-stat .steps-mini span.done{ background: var(--accent); }
+
+  /* ---------- layout ---------- */
+  .layout{
+    max-width: 1180px; margin: 0 auto; padding: 0 28px 120px;
+    display:grid; grid-template-columns: 240px 1fr; gap: 48px;
+    align-items:start;
+  }
+  nav.rail{
+    position: sticky; top: 74px;
+    display:flex; flex-direction:column; gap: 2px;
+    border-left: 1px solid var(--line);
+    padding-left: 18px;
+  }
+  nav.rail .rail-item{
+    display:block; padding: 11px 0; cursor:pointer;
+    border:none; background:none; text-align:left; width:100%;
+    color: var(--muted); position:relative;
+  }
+  nav.rail .rail-item::before{
+    content:""; position:absolute; left:-19px; top: 15px; width:7px; height:7px;
+    border-radius:50%; background: var(--line); border: 2px solid var(--paper);
+  }
+  nav.rail .rail-item.active{ color: var(--ink); }
+  nav.rail .rail-item.active::before{ background: var(--accent); }
+  nav.rail .rail-item.complete::before{ background: var(--gold); }
+  nav.rail .r-num{ font-family:'IBM Plex Mono',monospace; font-size:11px; color: var(--muted); display:block; }
+  nav.rail .r-name{ font-size:14px; font-weight:500; display:block; margin-top:2px; }
+  nav.rail .r-pct{ font-family:'IBM Plex Mono',monospace; font-size:11px; color: var(--muted); display:block; margin-top:2px;}
+
+  main{ min-width:0; }
+
+  section.step{
+    padding: 46px 0 54px;
+    border-bottom: 1px solid var(--line);
+  }
+  section.step:last-child{ border-bottom:none; }
+
+  .step-head{ display:flex; gap: 18px; align-items:flex-start; }
+  .step-badge{
+    font-family:'IBM Plex Mono',monospace; font-size: 13px; color: var(--accent);
+    border:1px solid var(--accent); border-radius: 50%;
+    width: 34px; height:34px; display:flex; align-items:center; justify-content:center;
+    flex: none;
+  }
+  .step-head h2{ font-size: 25px; }
+  .step-tag{
+    font-size: 12px; color: var(--ink-soft); margin-top: 5px;
+  }
+
+  .step-body{ margin-top: 20px; margin-left: 52px; }
+  .step-body > p{ color: var(--ink-soft); max-width: 68ch; }
+
+  .grid-2{ display:grid; grid-template-columns: 1fr; gap: 30px; margin-top: 26px; }
+
+  .panel{
+    background: var(--panel); border:1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 20px 22px;
+    display:flex; flex-direction:column;
+  }
+  .panel h4{ font-size: 12px; text-transform: none; letter-spacing:.01em; color: var(--ink-soft); font-family:'Inter',sans-serif; font-weight:600; }
+  .panel > svg[role="img"]{
+    display:block; width:100%; max-width:460px; margin: 14px auto 0; height:auto; align-self:center;
+  }
+
+  .checklist{ list-style:none; margin: 14px 0 0; padding:0; display:flex; flex-direction:column; gap: 2px; }
+  .checklist li{ border-top: 1px solid var(--line-soft); }
+  .checklist li:first-child{ border-top:none; }
+  .checklist label{
+    display:flex; gap: 12px; align-items:flex-start; padding: 11px 2px; cursor:pointer;
+  }
+  .checklist input[type=checkbox]{
+    appearance:none; -webkit-appearance:none; width:17px; height:17px; margin-top:2px;
+    border:1.5px solid var(--muted); border-radius: 3px; flex:none; position:relative; cursor:pointer;
+    background: var(--panel);
+  }
+  .checklist input[type=checkbox]:checked{ background: var(--accent); border-color: var(--accent); }
+  .checklist input[type=checkbox]:checked::after{
+    content:""; position:absolute; left:4px; top:1px; width:5px; height:9px;
+    border: solid var(--accent-ink); border-width: 0 2px 2px 0; transform: rotate(40deg);
+  }
+  .checklist .txt{ font-size:14.5px; line-height:1.45; color: var(--ink); }
+  .checklist input:checked ~ .txt{ color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+
+  .callout{
+    border-left: 3px solid var(--gold); background: var(--gold-soft);
+    padding: 12px 16px; border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 13.5px; color: var(--ink-soft); margin-top:16px;
+  }
+  .callout b{ color: var(--ink); }
+  .callout.warn{ border-left-color: var(--rust); background: var(--rust-soft); }
+
+  .formula{
+    font-family:'IBM Plex Mono',monospace; font-size: 13px; background: var(--paper-2);
+    border:1px solid var(--line); border-radius: var(--radius); padding: 12px 14px;
+    margin-top: 10px; color: var(--ink); overflow-x:auto; white-space:pre;
+  }
+
+  table.ledger{ width:100%; border-collapse: collapse; margin-top: 12px; font-size: 12.5px; }
+  table.ledger caption{ text-align:left; font-size:11px; color:var(--muted); margin-bottom:6px; }
+  table.ledger th, table.ledger td{
+    padding: 7px 8px; border-bottom: 1px solid var(--line-soft); text-align:right; white-space:nowrap;
+  }
+  table.ledger th:first-child, table.ledger td:first-child,
+  table.ledger th:nth-child(2), table.ledger td:nth-child(2){ text-align:left; white-space:normal; }
+  table.ledger thead th{ color: var(--muted); font-weight:600; font-size:11px; border-bottom:1px solid var(--line); }
+  table.ledger tbody tr:hover{ background: var(--paper-2); }
+  table.ledger tbody tr.tier td{ font-weight:600; background: var(--paper-2); color: var(--ink-soft); }
+  table.ledger tfoot td{ font-weight:600; border-top: 1px solid var(--line); border-bottom:none; }
+  table.ledger td.num, table.ledger th.num{ font-family:'IBM Plex Mono',monospace; }
+  .scrollx{ overflow-x:auto; }
+
+  .tag-row{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 14px; }
+  .tag{
+    font-size:11.5px; padding: 4px 9px; border-radius: 20px; border:1px solid var(--line);
+    color: var(--ink-soft); background: var(--paper-2);
+  }
+
+  .source-list{ margin: 12px 0 0; padding-left: 18px; color: var(--ink-soft); font-size: 13.5px; }
+  .source-list li{ margin-bottom: 4px; }
+
+  svg[role="img"]{ display:block; width:100%; max-width:460px; margin:14px auto 0; height:auto; }
+  svg text{ font-family:'IBM Plex Mono', monospace; }
+
+  footer{
+    max-width: 1180px; margin: 0 auto; padding: 28px 28px 60px; color: var(--muted); font-size:12.5px;
+    border-top: 1px solid var(--line);
+  }
+
+  @media (max-width: 860px){
+    .topbar{ flex-wrap:wrap; padding:12px 18px; }
+    .topbar-brand{ flex:1; }
+    .site-nav{ order:1; flex-basis:100%; justify-content:center; overflow-x:auto; }
+    .topbar-progress{ order:2; min-width:0; flex:1; max-width:320px; }
+    .hero{ grid-template-columns: 1fr; padding-top: 34px; }
+    .layout{ grid-template-columns: 1fr; }
+    nav.rail{
+      position: static; flex-direction:row; overflow-x:auto; border-left:none;
+      padding-left:0; border-bottom:1px solid var(--line); padding-bottom: 10px; gap: 18px;
+    }
+    nav.rail .rail-item{ flex:none; padding: 4px 0; }
+    nav.rail .rail-item::before{ left:-12px; top: 7px; }
+    .step-body{ margin-left: 0; }
+    .hero h1{ font-size:30px; }
+  }
+
+  table.ledger.n th:nth-child(2), table.ledger.n td:nth-child(2){ text-align:right; white-space:nowrap; }
+  table.ledger.t td, table.ledger.t th{ white-space:normal; }
+  table.ledger td.hi{ background: var(--gold); color:#fff; font-weight:600; }
+  table.ledger td.mid{ background: var(--gold-soft); }
+  table.ledger tr.sub td{ color: var(--muted); font-style: italic; }
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:26px; }
+  @media (max-width: 760px){ .two-col{ grid-template-columns:1fr; } }
+  .bridge{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .bridge div{ flex:1 1 84px; border:1px solid var(--line); background: var(--paper-2); border-radius: var(--radius); padding:9px 10px; text-align:center; font-size:11.5px; color: var(--muted); }
+  .bridge div b{ display:block; font-family:'IBM Plex Mono',monospace; font-size:13px; color: var(--ink); font-weight:600; }
+  .bridge div.k{ background: var(--accent-soft); border-color: var(--accent); }
+  .bridge div.k b{ color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <span class="mark">Discounted Cash Flow</span>
+    <span class="sub">a working guide</span>
+  </div>
+  <nav class="site-nav" aria-label="Main navigation">
+    <a href="index.html">Home</a>
+    <a href="valuation-methodologies.html" aria-current="page">Valuation Methods</a>
+    <a href="notes.html">Notes</a>
+  </nav>
+  <div class="topbar-progress">
+    <div class="track"><div class="fill" id="topFill"></div></div>
+    <span class="pct mono" id="topPct">0%</span>
+    <button class="reset-btn" id="resetBtn" title="Clear all checked items">Reset</button>
+  </div>
+</div>
+
+<div class="hero">
+  <div>
+    <h1>Building a discounted cash flow analysis, start to finish</h1>
+    <p class="lede">A DCF values a company, division, or set of assets as the present value of the free cash flow it is expected to produce. Because it rests on assumptions rather than market prices, it is the standard cross-check on comps and precedents — and it is only as good as those assumptions. This guide walks the five steps bankers use to build one, with the checklist, formulas, and numbers from the ValueCo model built into each.</p>
+  </div>
+  <div class="hero-stat">
+    <div class="ring-row">
+      <div>
+        <div class="num mono"><span id="doneCount">0</span>/<span id="totalCount">0</span></div>
+        <div class="label">tasks completed</div>
+      </div>
+    </div>
+    <div class="steps-mini" id="stepsMini"></div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="rail" id="rail"></nav>
+
+  <main id="main">
+
+    <section class="step" id="step-1" data-step="1">
+      <div class="step-head">
+        <div class="step-badge">1</div>
+        <div>
+          <h2>Study the target and determine key performance drivers</h2>
+          <div class="step-tag">Shortcuts here distort every assumption that follows</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>Learn as much as possible about the target and its sector before touching a model: business model, financial profile, value proposition, end markets, competitors, and key risks. Then isolate the drivers of sales growth, profitability, and FCF generation — they are what let you build, or defend, a set of projections. This is far easier for a public company than a private one, because the filings and research already exist.</p>
+        <div class="grid-2">
+<div class="panel">
+<h4>Checklist</h4>
+<ul class="checklist" data-step="1">
+<li><label><input type="checkbox" data-id="s1-1"><span class="txt">Review the target's business model, value proposition, end markets, competitors, and key risks</span></label></li>
+<li><label><input type="checkbox" data-id="s1-2"><span class="txt">Public target: read recent 10-Ks, 10-Qs, 8-Ks, earnings call transcripts, and investor presentations</span></label></li>
+<li><label><input type="checkbox" data-id="s1-3"><span class="txt">Read the MD&amp;A of the latest 10-K and 10-Q for the drivers of past performance and management's outlook</span></label></li>
+<li><label><input type="checkbox" data-id="s1-4"><span class="txt">Pull equity research for two- to three-year estimates and added perspective</span></label></li>
+<li><label><input type="checkbox" data-id="s1-5"><span class="txt">Private target: get management materials — in an organized sale process, the CIM</span></label></li>
+<li><label><input type="checkbox" data-id="s1-6"><span class="txt">No management materials: use company websites, trade journals, news, and filings or research on public competitors, customers, and suppliers</span></label></li>
+<li><label><input type="checkbox" data-id="s1-7"><span class="txt">Former public filer or subsidiary of one: read the old filings and research reports</span></label></li>
+<li><label><input type="checkbox" data-id="s1-8"><span class="txt">List the key internal drivers (new facilities, products, contracts, operating and working capital efficiency)</span></label></li>
+<li><label><input type="checkbox" data-id="s1-9"><span class="txt">List the key external drivers (acquisitions, end-market trends, buying patterns, macro, regulation)</span></label></li>
+<li><label><input type="checkbox" data-id="s1-10"><span class="txt">Compare the target's growth, profitability, capex, and working capital efficiency with peers to see where it differs</span></label></li>
+</ul>
+</div>
+<div class="panel">
+<h4>Where drivers come from</h4>
+<div class="two-col" style="margin-top:10px;">
+<div><div style="font-size:13px; font-weight:600;">Internal</div><ul class="source-list"><li>Opening new facilities or stores</li><li>Developing new products</li><li>Securing new customer contracts</li><li>Improving operating and working capital efficiency</li></ul></div>
+<div><div style="font-size:13px; font-weight:600;">External</div><ul class="source-list"><li>Acquisitions</li><li>End-market trends</li><li>Consumer buying patterns</li><li>Macro factors, legislative or regulatory change</li></ul></div>
+</div>
+<div class="callout"><b>ValueCo:</b> a private company, valued as if no management projections were provided. The team reviewed basic company information, mapped its sector, competitors, customers, and suppliers from trade journals and industry studies, and used consensus estimates for public comparables to guide Base Case growth and margin trends.</div>
+</div>
+        </div>
+<div class="tag-row"><span class="tag">Public: filings + research</span><span class="tag">Private: CIM or alternatives</span><span class="tag">Drivers before projections</span></div>
+      </div>
+    </section>
+
+    <section class="step" id="step-2" data-step="2">
+      <div class="step-head">
+        <div class="step-badge">2</div>
+        <div>
+          <h2>Project free cash flow</h2>
+          <div class="step-tag">The core of the DCF, and the input with the greatest effect on value</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>Unlevered FCF is the cash a company generates after all cash operating expenses and taxes, and after funding capex and working capital, but before any interest. Because it is independent of capital structure, it represents cash available to every capital provider — debt and equity.</p>
+        <div class="grid-2">
+<div class="panel">
+<h4>Checklist</h4>
+<ul class="checklist" data-step="2">
+<li><label><input type="checkbox" data-id="s2-1"><span class="txt">Lay out the prior three years of historical financials, adjusted for non-recurring items and recent events</span></label></li>
+<li><label><input type="checkbox" data-id="s2-2"><span class="txt">Set the projection period — typically five years; ten or more for early-stage, rapid-growth, or long-term contracted businesses</span></label></li>
+<li><label><input type="checkbox" data-id="s2-3"><span class="txt">Confirm the final year reaches a steady state that can support a terminal value</span></label></li>
+<li><label><input type="checkbox" data-id="s2-4"><span class="txt">Build cases: Management Case (if provided), Base Case with more probable assumptions, plus upside and downside, driven by a switch cell</span></label></li>
+<li><label><input type="checkbox" data-id="s2-5"><span class="txt">Sales: take the first two to three years from consensus (peer consensus for private targets), then step growth down toward 2–4% by the terminal year</span></label></li>
+<li><label><input type="checkbox" data-id="s2-6"><span class="txt">Cyclical target: let sales follow the commodity cycle but return to a normalized level by the terminal year</span></label></li>
+<li><label><input type="checkbox" data-id="s2-7"><span class="txt">Sanity-check sales growth against history, peer estimates, and sector outlook, and against capex and working capital assumptions</span></label></li>
+<li><label><input type="checkbox" data-id="s2-8"><span class="txt">COGS and SG&amp;A: drive from historical percentages of sales, or use research estimates for the early years</span></label></li>
+<li><label><input type="checkbox" data-id="s2-9"><span class="txt">EBITDA and EBIT: benchmark to consensus and hold margins constant from the last estimate year unless there is a reason to change them</span></label></li>
+<li><label><input type="checkbox" data-id="s2-10"><span class="txt">Tax: apply the marginal rate (25% is the usual modeling assumption) to EBIT; check the effective rate for reference</span></label></li>
+<li><label><input type="checkbox" data-id="s2-11"><span class="txt">D&amp;A: project as a percentage of sales or capex, or from a PP&amp;E schedule; make D&amp;A and capex converge by the final year</span></label></li>
+<li><label><input type="checkbox" data-id="s2-12"><span class="txt">Capex: start from the cash flow statement and MD&amp;A guidance; default to a historical percentage of sales</span></label></li>
+<li><label><input type="checkbox" data-id="s2-13"><span class="txt">Working capital: project A/R (DSO), inventory (DIH), A/P (DPO), and prepaids, accrued and other liabilities as % of sales</span></label></li>
+<li><label><input type="checkbox" data-id="s2-14"><span class="txt">Calculate the year-over-year change in NWC and subtract any increase from EBIAT</span></label></li>
+<li><label><input type="checkbox" data-id="s2-15"><span class="txt">Calculate annual unlevered FCF for the projection period</span></label></li>
+</ul>
+</div>
+<div class="panel">
+<h4>From EBIT to free cash flow</h4>
+<div class="bridge">
+<div class="k"><b>EBIT</b>start</div><div><b>− Taxes</b>marginal rate</div><div class="k"><b>EBIAT</b>a.k.a. NOPAT</div><div><b>+ D&amp;A</b>non-cash</div><div><b>− Capex</b>cash out</div><div><b>− ΔNWC</b>increase = use</div><div class="k"><b>FCF</b>unlevered</div>
+</div>
+<div class="formula">DSO  =  A/R ÷ Sales × 365
+DIH  =  Inventory ÷ COGS × 365      (turns = COGS ÷ Inventory)
+DPO  =  A/P ÷ COGS × 365
+
+NWC  =  (A/R + Inventory + Prepaids &amp; other)
+      − (A/P + Accrued + Other current liabilities)
+ΔNWC =  NWC(n) − NWC(n−1)      increase = use of cash</div>
+</div>
+<div class="panel">
+<h4>ValueCo Base Case assumptions</h4>
+<div class="scrollx"><table class="ledger t">
+<caption>Held from the 2018 level unless noted</caption>
+<thead><tr><th>Driver</th><th class="num">Assumption</th></tr></thead><tbody>
+<tr><td>Sales growth</td><td>7.5%, 6.0%, 5.0% (peer consensus), then 4.0%, 3.0%</td></tr>
+<tr><td>COGS / SG&amp;A</td><td>60% / 19% of sales (EBITDA margin 21%)</td></tr>
+<tr><td>D&amp;A</td><td>6% of sales</td></tr>
+<tr><td>Capex</td><td>4.5% of sales</td></tr>
+<tr><td>Marginal tax rate</td><td>25%</td></tr>
+<tr><td>DSO / DIH / DPO</td><td>47.6 / 105.8 / 37.9 days</td></tr>
+<tr><td>Prepaids / accrued / other CL</td><td>5.1% / 8.0% / 2.9% of sales</td></tr>
+</tbody></table></div>
+</div>
+<div class="panel">
+<h4>ValueCo projected free cash flow</h4>
+<div class="scrollx"><table class="ledger n">
+<caption>$ in millions, fiscal year ending December 31</caption>
+<thead><tr><th></th><th class="num">2020E</th><th class="num">2021E</th><th class="num">2022E</th><th class="num">2023E</th><th class="num">2024E</th></tr></thead><tbody>
+<tr><td>Sales</td><td class="num">3,708.8</td><td class="num">3,931.3</td><td class="num">4,127.8</td><td class="num">4,293.0</td><td class="num">4,421.7</td></tr>
+<tr class="sub"><td>% growth</td><td class="num">7.5%</td><td class="num">6.0%</td><td class="num">5.0%</td><td class="num">4.0%</td><td class="num">3.0%</td></tr>
+<tr><td>EBITDA</td><td class="num">779.4</td><td class="num">826.1</td><td class="num">867.4</td><td class="num">902.1</td><td class="num">929.2</td></tr>
+<tr><td>Less: D&amp;A</td><td class="num">(222.5)</td><td class="num">(235.9)</td><td class="num">(247.7)</td><td class="num">(257.6)</td><td class="num">(265.3)</td></tr>
+<tr><td>EBIT</td><td class="num">556.9</td><td class="num">590.3</td><td class="num">619.8</td><td class="num">644.6</td><td class="num">663.9</td></tr>
+<tr><td>Less: taxes @ 25%</td><td class="num">(139.2)</td><td class="num">(147.6)</td><td class="num">(154.9)</td><td class="num">(161.1)</td><td class="num">(166.0)</td></tr>
+<tr><td>EBIAT</td><td class="num">417.6</td><td class="num">442.7</td><td class="num">464.8</td><td class="num">483.4</td><td class="num">497.9</td></tr>
+<tr><td>Plus: D&amp;A</td><td class="num">222.5</td><td class="num">235.9</td><td class="num">247.7</td><td class="num">257.6</td><td class="num">265.3</td></tr>
+<tr><td>Less: capex</td><td class="num">(166.9)</td><td class="num">(176.9)</td><td class="num">(185.8)</td><td class="num">(193.2)</td><td class="num">(199.0)</td></tr>
+<tr><td>Less: increase in NWC</td><td class="num">(47.6)</td><td class="num">(41.0)</td><td class="num">(36.2)</td><td class="num">(30.4)</td><td class="num">(23.7)</td></tr>
+<tr class="tier"><td>Unlevered free cash flow</td><td class="num">425.6</td><td class="num">460.7</td><td class="num">490.6</td><td class="num">517.4</td><td class="num">540.5</td></tr>
+</tbody></table></div>
+</div>
+        </div>
+<div class="callout warn"><b>Don't let sales run ahead of the balance sheet.</b> Higher top-line growth normally needs more capex and more working capital behind it. If growth goes up and neither moves, the projections are internally inconsistent.</div><div class="tag-row"><span class="tag">Unlevered, pre-interest</span><span class="tag">Base, upside, downside</span><span class="tag">D&amp;A ≈ capex in the terminal year</span></div>
+      </div>
+    </section>
+
+    <section class="step" id="step-3" data-step="3">
+      <div class="step-head">
+        <div class="step-badge">3</div>
+        <div>
+          <h2>Calculate weighted average cost of capital</h2>
+          <div class="step-tag">The discount rate that reflects the target's business and financial risk</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>WACC is the weighted average of the required return on debt and equity at the target's capital structure. It works as an opportunity cost — what an investor would expect from another investment of similar risk. For a company with very different business segments, consider a sum-of-the-parts DCF with a separate WACC for each.</p>
+        <div class="grid-2">
+<div class="panel">
+<h4>Checklist</h4>
+<ul class="checklist" data-step="3">
+<li><label><input type="checkbox" data-id="s3-1"><span class="txt">Choose a target capital structure (D/(D+E) and E/(D+E)) consistent with long-term strategy</span></label></li>
+<li><label><input type="checkbox" data-id="s3-2"><span class="txt">Public target: use current capital structure if comfortably within the peer range, otherwise the peer mean or median</span></label></li>
+<li><label><input type="checkbox" data-id="s3-3"><span class="txt">Private target: use the peer mean or median, and hold it constant across the projection period</span></label></li>
+<li><label><input type="checkbox" data-id="s3-4"><span class="txt">Cost of debt: use the blended current yield on outstanding debt if at target structure; otherwise derive from peers</span></label></li>
+<li><label><input type="checkbox" data-id="s3-5"><span class="txt">For private debt, ask the debt capital markets team for the current yield; if unavailable, approximate from credit ratings and comparable credits</span></label></li>
+<li><label><input type="checkbox" data-id="s3-6"><span class="txt">Tax-effect the cost of debt at the marginal rate</span></label></li>
+<li><label><input type="checkbox" data-id="s3-7"><span class="txt">Choose a risk-free rate — 10-year Treasury in common practice, or a 20-year interpolated yield</span></label></li>
+<li><label><input type="checkbox" data-id="s3-8"><span class="txt">Choose a market risk premium and confirm it against firm policy (Wall Street typically 5–8%)</span></label></li>
+<li><label><input type="checkbox" data-id="s3-9"><span class="txt">Source predicted betas for each comparable (or historical betas, or both, and show a range)</span></label></li>
+<li><label><input type="checkbox" data-id="s3-10"><span class="txt">Unlever each comparable's beta using its market D/E and marginal tax rate</span></label></li>
+<li><label><input type="checkbox" data-id="s3-11"><span class="txt">Average the unlevered betas, then relever at the target's D/E and tax rate</span></label></li>
+<li><label><input type="checkbox" data-id="s3-12"><span class="txt">Add a size premium for smaller companies, based on market-cap decile</span></label></li>
+<li><label><input type="checkbox" data-id="s3-13"><span class="txt">Calculate cost of equity with CAPM, then WACC</span></label></li>
+<li><label><input type="checkbox" data-id="s3-14"><span class="txt">Sensitize target capital structure and cost of debt to produce a WACC range</span></label></li>
+</ul>
+</div>
+<div class="panel">
+<h4>The formulas</h4>
+<div class="formula">WACC  =  [ rd × (1 − t) × D/(D+E) ]  +  [ re × E/(D+E) ]
+
+re    =  rf + βL × (rm − rf) + SP
+         risk-free + levered beta × market risk premium + size premium
+
+βU    =  βL ÷ [ 1 + (D/E) × (1 − t) ]
+βL    =  βU × [ 1 + (D/E) × (1 − t) ]</div>
+</div>
+<div class="panel">
+<h4>ValueCo comparable betas</h4>
+<div class="scrollx"><table class="ledger n">
+<caption>$ in millions; marginal tax rate 25% for all</caption>
+<thead><tr><th>Company</th><th class="num">Levered beta</th><th class="num">Debt</th><th class="num">Equity</th><th class="num">D/E</th><th class="num">Unlevered beta</th></tr></thead><tbody>
+<tr><td>BuyerCo</td><td class="num">1.35</td><td class="num">2,200.0</td><td class="num">9,800.0</td><td class="num">22.4%</td><td class="num">1.16</td></tr>
+<tr><td>Sherman Co.</td><td class="num">1.46</td><td class="num">3,150.0</td><td class="num">5,600.0</td><td class="num">56.3%</td><td class="num">1.03</td></tr>
+<tr><td>Gasparro Corp.</td><td class="num">1.30</td><td class="num">1,850.0</td><td class="num">5,000.0</td><td class="num">37.0%</td><td class="num">1.02</td></tr>
+<tr><td>Goodson Corp</td><td class="num">1.53</td><td class="num">2,250.0</td><td class="num">4,160.0</td><td class="num">54.1%</td><td class="num">1.09</td></tr>
+<tr><td>S. Momper &amp; Co.</td><td class="num">1.50</td><td class="num">1,000.0</td><td class="num">2,240.0</td><td class="num">44.6%</td><td class="num">1.12</td></tr>
+<tr class="tier"><td>Mean</td><td class="num">1.43</td><td class="num"></td><td class="num"></td><td class="num">42.9%</td><td class="num">1.08</td></tr>
+<tr class="tier"><td>Median</td><td class="num">1.46</td><td class="num"></td><td class="num"></td><td class="num">44.6%</td><td class="num">1.09</td></tr>
+</tbody></table></div>
+</div>
+<div class="panel">
+<h4>ValueCo WACC build</h4>
+<div class="two-col"><div class="scrollx"><table class="ledger n">
+<caption>Cost of equity</caption>
+<thead><tr><th>Input</th><th class="num"></th></tr></thead><tbody>
+<tr><td>Risk-free rate (20-yr)</td><td class="num">2.5%</td></tr>
+<tr><td>Market risk premium</td><td class="num">7.0%</td></tr>
+<tr><td>Relevered beta</td><td class="num">1.43</td></tr>
+<tr><td>Size premium</td><td class="num">1.1%</td></tr>
+<tr class="tier"><td>Cost of equity</td><td class="num">13.6%</td></tr>
+</tbody></table></div><div class="scrollx"><table class="ledger n">
+<caption>WACC</caption>
+<thead><tr><th>Input</th><th class="num"></th></tr></thead><tbody>
+<tr><td>Pre-tax cost of debt</td><td class="num">6.5%</td></tr>
+<tr><td>After-tax cost of debt</td><td class="num">4.9%</td></tr>
+<tr><td>Debt / total cap</td><td class="num">30.0%</td></tr>
+<tr><td>Equity / total cap</td><td class="num">70.0%</td></tr>
+<tr class="tier"><td>WACC</td><td class="num">11.0%</td></tr>
+</tbody></table></div></div><div class="formula">(4.9% × 30%) + (13.6% × 70%)  ≈  11.0%
+Sensitizing structure and cost of debt gives roughly 10.5% – 11.5%</div>
+</div>
+        </div>
+<div class="callout warn"><b>Check the relevered beta.</b> The chapter's text quotes 1.29, but the exhibits and the math both give 1.43: 1.08 × [1 + 42.9% × (1 − 25%)]. Use 1.43.</div><div class="tag-row"><span class="tag">Hold structure constant</span><span class="tag">Unlever, average, relever</span><span class="tag">Sensitize the range</span></div>
+      </div>
+    </section>
+
+    <section class="step" id="step-4" data-step="4">
+      <div class="step-head">
+        <div class="step-badge">4</div>
+        <div>
+          <h2>Determine terminal value</h2>
+          <div class="step-tag">Often three-quarters of the answer, so it gets the most scrutiny</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>Projecting FCF forever is impossible, so a terminal value captures everything beyond the projection period. It can be as much as three-quarters or more of the DCF value, which is why the terminal-year data must be a normalized steady state, not a cyclical high or low. Two methods are widely accepted, and each checks the other.</p>
+        <div class="grid-2">
+<div class="panel">
+<h4>Checklist</h4>
+<ul class="checklist" data-step="4">
+<li><label><input type="checkbox" data-id="s4-1"><span class="txt">Confirm terminal-year financials are a steady state, not a cyclical peak or trough</span></label></li>
+<li><label><input type="checkbox" data-id="s4-2"><span class="txt">Exit multiple method: base the multiple on current LTM trading multiples of comparables</span></label></li>
+<li><label><input type="checkbox" data-id="s4-3"><span class="txt">Use a normalized trading multiple and normalized EBITDA — a peak or trough on either skews the result</span></label></li>
+<li><label><input type="checkbox" data-id="s4-4"><span class="txt">Sensitize the exit multiple (e.g. 6.5x to 8.5x around a 7.0x–8.0x comp range)</span></label></li>
+<li><label><input type="checkbox" data-id="s4-5"><span class="txt">Perpetuity growth method: pick a long-term growth rate, usually 2–4% (nominal GDP growth) and grounded in industry growth</span></label></li>
+<li><label><input type="checkbox" data-id="s4-6"><span class="txt">Sensitize the perpetuity growth rate</span></label></li>
+<li><label><input type="checkbox" data-id="s4-7"><span class="txt">Calculate the perpetuity growth rate implied by the exit multiple, and revisit the multiple if it looks too high or low</span></label></li>
+<li><label><input type="checkbox" data-id="s4-8"><span class="txt">Calculate the exit multiple implied by the perpetuity growth method, and revisit the growth rate if it sits outside normalized trading multiples</span></label></li>
+<li><label><input type="checkbox" data-id="s4-9"><span class="txt">If using mid-year convention, use the mid-year formulas for the implied rate and multiple</span></label></li>
+</ul>
+</div>
+<div class="panel">
+<h4>The formulas</h4>
+<div class="formula">Exit multiple method
+  TV  =  EBITDA(n) × Exit multiple
+
+Perpetuity growth method
+  TV  =  FCF(n) × (1 + g) ÷ (r − g)          r = WACC, g = growth
+
+Implied growth rate  (TV from exit multiple, mid-year)
+  g   =  [ TV × WACC − FCF(n) × (1+WACC)^0.5 ]
+       ÷ [ TV + FCF(n) × (1+WACC)^0.5 ]
+
+Implied exit multiple  (TV from perpetuity growth, mid-year)
+  x   =  TV × (1+WACC)^0.5 ÷ EBITDA(n)</div><div class="callout" style="margin-top:12px;">End-of-year versions drop the (1+WACC)^0.5 terms: implied g = (TV × WACC − FCF) ÷ (TV + FCF); implied multiple = TV ÷ EBITDA.</div>
+</div>
+<div class="panel">
+<h4>ValueCo terminal value, two ways</h4>
+<div class="scrollx"><table class="ledger n">
+<caption>$ in millions</caption>
+<thead><tr><th></th><th class="num">Exit multiple</th><th class="num">Perpetuity growth</th></tr></thead><tbody>
+<tr><td>Terminal-year metric (2024E)</td><td class="num">EBITDA 929.2</td><td class="num">FCF 540.5</td></tr>
+<tr><td>Key assumption</td><td class="num">7.5x (comps 7.0x–8.0x)</td><td class="num">3.0% (range 2–4%)</td></tr>
+<tr><td>WACC</td><td class="num">—</td><td class="num">11.0%</td></tr>
+<tr class="tier"><td>Terminal value</td><td class="num">6,969.0</td><td class="num">6,959.6</td></tr>
+<tr><td>Cross-check</td><td class="num">Implied growth 2.6%</td><td class="num">Implied multiple 7.9x</td></tr>
+</tbody></table></div>
+</div>
+        </div>
+<div class="callout"><b>The two methods agree.</b> A 7.5x exit multiple implies 2.6% growth, and 3% growth implies about 7.9x — both inside the ranges chosen, so neither assumption looks stretched.</div><div class="tag-row"><span class="tag">Use both methods</span><span class="tag">Normalize the terminal year</span><span class="tag">Sensitize both drivers</span></div>
+      </div>
+    </section>
+
+    <section class="step" id="step-5" data-step="5">
+      <div class="step-head">
+        <div class="step-badge">5</div>
+        <div>
+          <h2>Calculate present value and determine valuation</h2>
+          <div class="step-tag">Discount, sum, bridge to equity, then test the range</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p>Multiply each year's FCF and the terminal value by its discount factor, sum them to an enterprise value, and bridge to equity value. Because a DCF rests on so many assumptions, the output is a range built with sensitivity analysis — then compared with comps, precedents, and LBO analysis as a sanity check.</p>
+        <div class="grid-2">
+<div class="panel">
+<h4>Checklist</h4>
+<ul class="checklist" data-step="5">
+<li><label><input type="checkbox" data-id="s5-1"><span class="txt">Discount each year's FCF using mid-year convention (periods 0.5, 1.5 … 4.5)</span></label></li>
+<li><label><input type="checkbox" data-id="s5-2"><span class="txt">Discount an exit-multiple terminal value at year-end (period 5); discount a perpetuity-growth terminal value at mid-year</span></label></li>
+<li><label><input type="checkbox" data-id="s5-3"><span class="txt">Skip mid-year convention for highly seasonal businesses</span></label></li>
+<li><label><input type="checkbox" data-id="s5-4"><span class="txt">Sum the PV of FCF and PV of terminal value to enterprise value</span></label></li>
+<li><label><input type="checkbox" data-id="s5-5"><span class="txt">Calculate PV of terminal value as a % of enterprise value and check it is reasonable</span></label></li>
+<li><label><input type="checkbox" data-id="s5-6"><span class="txt">Bridge to equity value: less debt, preferred stock, and noncontrolling interest; plus cash</span></label></li>
+<li><label><input type="checkbox" data-id="s5-7"><span class="txt">Public target: divide by fully diluted shares; turn on iterative calculation to resolve the option / share price circularity</span></label></li>
+<li><label><input type="checkbox" data-id="s5-8"><span class="txt">Build the WACC × exit multiple sensitivity table for enterprise value, then equity value, implied growth rate, implied EV/EBITDA, and TV %</span></label></li>
+<li><label><input type="checkbox" data-id="s5-9"><span class="txt">Sensitize sales growth and EBIT margin to see value created or lost versus the Base Case</span></label></li>
+<li><label><input type="checkbox" data-id="s5-10"><span class="txt">Pick the range to carry forward (e.g. 10.5%–11.5% WACC and 7.0x–8.0x exit multiple)</span></label></li>
+<li><label><input type="checkbox" data-id="s5-11"><span class="txt">Plot the range on the football field next to comps, precedents, and LBO (if applicable)</span></label></li>
+<li><label><input type="checkbox" data-id="s5-12"><span class="txt">If the DCF differs sharply from other methods, revisit projections first, then WACC and terminal value</span></label></li>
+</ul>
+</div>
+<div class="panel">
+<h4>The formulas</h4>
+<div class="formula">Discount factor (mid-year)  =  1 ÷ (1 + WACC)^(n − 0.5)
+Discount factor (year-end)  =  1 ÷ (1 + WACC)^n
+
+Enterprise value   =  Σ PV of FCF  +  PV of terminal value
+Equity value       =  EV − Debt − Preferred − NCI + Cash
+Implied share price =  Equity value ÷ Fully diluted shares</div>
+</div>
+<div class="panel">
+<h4>ValueCo present value at an 11.0% WACC</h4>
+<div class="scrollx"><table class="ledger n">
+<caption>$ in millions</caption>
+<thead><tr><th></th><th class="num">2020E</th><th class="num">2021E</th><th class="num">2022E</th><th class="num">2023E</th><th class="num">2024E</th></tr></thead><tbody>
+<tr><td>Unlevered FCF</td><td class="num">425.6</td><td class="num">460.7</td><td class="num">490.6</td><td class="num">517.4</td><td class="num">540.5</td></tr>
+<tr><td>Discount period</td><td class="num">0.5</td><td class="num">1.5</td><td class="num">2.5</td><td class="num">3.5</td><td class="num">4.5</td></tr>
+<tr><td>Discount factor</td><td class="num">0.95</td><td class="num">0.86</td><td class="num">0.77</td><td class="num">0.69</td><td class="num">0.63</td></tr>
+<tr class="tier"><td>PV of FCF</td><td class="num">404.0</td><td class="num">393.9</td><td class="num">377.9</td><td class="num">359.1</td><td class="num">338.0</td></tr>
+</tbody></table></div>
+</div>
+<div class="panel">
+<h4>Enterprise value to equity value</h4>
+<div class="scrollx"><table class="ledger n">
+<caption>$ in millions</caption>
+<thead><tr><th></th><th class="num">Value</th></tr></thead><tbody>
+<tr><td>Sum of PV of FCF</td><td class="num">1,872.9</td></tr>
+<tr><td>Terminal value (7.5x × 929.2)</td><td class="num">6,969.0</td></tr>
+<tr><td>Discount factor (year-end, n = 5)</td><td class="num">0.59</td></tr>
+<tr><td>PV of terminal value</td><td class="num">4,135.8</td></tr>
+<tr class="tier"><td>Enterprise value</td><td class="num">6,008.7</td></tr>
+<tr class="sub"><td>PV of TV as % of EV</td><td class="num">68.8%</td></tr>
+<tr><td>Less: total debt</td><td class="num">(1,500.0)</td></tr>
+<tr><td>Plus: cash and equivalents</td><td class="num">250.0</td></tr>
+<tr class="tier"><td>Implied equity value</td><td class="num">4,758.7</td></tr>
+</tbody></table></div>
+</div>
+<div class="panel">
+<h4>Sensitivity: enterprise value by WACC and exit multiple</h4>
+<div class="scrollx"><table class="ledger n">
+<caption>Shaded core (10.5%–11.5%, 7.0x–8.0x) gives $5,627M to $6,406M</caption>
+<thead><tr><th>WACC</th><th class="num">6.5x</th><th class="num">7.0x</th><th class="num">7.5x</th><th class="num">8.0x</th><th class="num">8.5x</th></tr></thead><tbody>
+<tr><td>10.0%</td><td class="num">5,665</td><td class="num">5,953</td><td class="num">6,242</td><td class="num">6,530</td><td class="num">6,819</td></tr>
+<tr><td>10.5%</td><td class="num">5,560</td><td class="num mid">5,842</td><td class="num mid">6,124</td><td class="num mid">6,406</td><td class="num">6,688</td></tr>
+<tr><td>11.0%</td><td class="num">5,457</td><td class="num mid">5,733</td><td class="num hi">6,009</td><td class="num mid">6,284</td><td class="num">6,560</td></tr>
+<tr><td>11.5%</td><td class="num">5,357</td><td class="num mid">5,627</td><td class="num mid">5,897</td><td class="num mid">6,166</td><td class="num">6,436</td></tr>
+<tr><td>12.0%</td><td class="num">5,260</td><td class="num">5,524</td><td class="num">5,787</td><td class="num">6,051</td><td class="num">6,315</td></tr>
+</tbody></table></div>
+</div>
+<div class="panel">
+<h4>Sensitivity: enterprise value by sales growth and EBIT margin</h4>
+<div class="scrollx"><table class="ledger n">
+<caption>Columns: change in annual sales growth. Rows: change in EBIT margin. +50 bps each adds about $187M</caption>
+<thead><tr><th>EBIT margin</th><th class="num">(1.0%)</th><th class="num">(0.5%)</th><th class="num">0.0%</th><th class="num">0.5%</th><th class="num">1.0%</th></tr></thead><tbody>
+<tr><td>(1.0%)</td><td class="num">5,646</td><td class="num">5,767</td><td class="num">5,890</td><td class="num">6,016</td><td class="num">6,143</td></tr>
+<tr><td>(0.5%)</td><td class="num">5,704</td><td class="num">5,826</td><td class="num">5,949</td><td class="num">6,076</td><td class="num">6,204</td></tr>
+<tr><td>0.0%</td><td class="num">5,761</td><td class="num">5,884</td><td class="num hi">6,009</td><td class="num">6,136</td><td class="num">6,265</td></tr>
+<tr><td>0.5%</td><td class="num">5,819</td><td class="num">5,942</td><td class="num">6,068</td><td class="num mid">6,196</td><td class="num">6,326</td></tr>
+<tr><td>1.0%</td><td class="num">5,877</td><td class="num">6,001</td><td class="num">6,127</td><td class="num">6,256</td><td class="num">6,387</td></tr>
+</tbody></table></div>
+</div>
+<div class="panel">
+<h4>The DCF range on the football field</h4>
+<svg viewBox="0 0 460 120" width="100%" height="auto" role="img" aria-label="DCF enterprise value range 5,627 to 6,406 million">
+  <line x1="150" y1="36" x2="400" y2="36" stroke="var(--line)" stroke-width="1"/>
+  <line x1="215" y1="36" x2="393" y2="36" stroke="var(--muted)" stroke-width="10" stroke-linecap="round"/>
+  <text x="10" y="36" class="bar-label" dominant-baseline="middle" style="font-size:11px;fill:var(--ink-soft)">Discounted cash flow</text>
+  <text x="215" y="62" text-anchor="middle" style="font-size:11px;fill:var(--ink)">5,627</text>
+  <text x="393" y="62" text-anchor="middle" style="font-size:11px;fill:var(--ink)">6,406</text>
+  <text x="150" y="98" text-anchor="middle" style="font-size:10px;fill:var(--muted)">4,750</text>
+  <text x="275" y="98" text-anchor="middle" style="font-size:10px;fill:var(--muted)">5,625</text>
+  <text x="400" y="98" text-anchor="middle" style="font-size:10px;fill:var(--muted)">6,500</text>
+  <text x="275" y="114" text-anchor="middle" style="font-size:10px;fill:var(--muted)">enterprise value, $M · 10.5–11.5% WACC · 7.0–8.0x exit</text>
+</svg><div class="callout">Add the comps and precedents ranges from Chapters 1 and 2 to complete the football field.</div>
+</div>
+        </div>
+<div class="grid-2"><div class="panel"><h4>Pros and cons</h4><div class="two-col" style="margin-top:10px;">
+<div><div style="font-size:13px; font-weight:600;">Pros</div><ul class="source-list"><li><b>Cash flow-based</b> — a more fundamental approach than multiples</li><li><b>Market independent</b> — insulated from bubbles and distressed periods</li><li><b>Self-sufficient</b> — works with few or no pure-play comparables</li><li><b>Flexible</b> — run growth, margin, capex, and working capital scenarios</li></ul></div>
+<div><div style="font-size:13px; font-weight:600;">Cons</div><ul class="source-list"><li><b>Depends on projections</b> — harder as the period lengthens</li><li><b>Sensitive to assumptions</b> — small changes move value meaningfully</li><li><b>Terminal value</b> — up to three-quarters or more of value</li><li><b>Constant capital structure</b> — no flexibility over the period</li></ul></div>
+</div></div></div>
+<div class="callout warn"><b>A gap versus other methods is a prompt, not a verdict.</b> Unrealistic projections are the most common cause — especially when a Management Case is used without testing it. But multiples can also miss company-specific factors, so a difference does not by itself mean the DCF is wrong.</div><div class="tag-row"><span class="tag">Range, not a point</span><span class="tag">Mid-year for FCF</span><span class="tag">Cross-check with comps and precedents</span></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  Built as a practical companion to the standard sell-side / advisory workflow for discounted cash flow analysis, based on the Rosenbaum &amp; Pearl framework (Chapter 3). Progress is stored only in this browser — nothing here leaves your device.
+</footer>
+
+<script>
+(function(){
+  var STEPS = [
+    {id:1, name:"Study the target"},
+    {id:2, name:"Project free cash flow"},
+    {id:3, name:"Calculate WACC"},
+    {id:4, name:"Terminal value"},
+    {id:5, name:"Present value & valuation"}
+  ];
+  var STORE_KEY = "dcf-guide-progress-v1";
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    }catch(e){ return {}; }
+  }
+  function saveState(state){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  var state = loadState();
+  var allBoxes = Array.prototype.slice.call(document.querySelectorAll('.checklist input[type=checkbox]'));
+
+  allBoxes.forEach(function(box){
+    var id = box.getAttribute('data-id');
+    if(state[id]) box.checked = true;
+    box.addEventListener('change', function(){
+      state[id] = box.checked;
+      saveState(state);
+      render();
+    });
+  });
+
+  var rail = document.getElementById('rail');
+  STEPS.forEach(function(s){
+    var btn = document.createElement('button');
+    btn.className = 'rail-item';
+    btn.setAttribute('data-target', 'step-' + s.id);
+    btn.innerHTML = '<span class="r-num mono">Step ' + s.id + '</span>' +
+                    '<span class="r-name">' + s.name + '</span>' +
+                    '<span class="r-pct mono" data-pct-for="'+s.id+'">0%</span>';
+    btn.addEventListener('click', function(){
+      var el = document.getElementById('step-' + s.id);
+      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    rail.appendChild(btn);
+  });
+
+  var stepsMini = document.getElementById('stepsMini');
+  STEPS.forEach(function(s){
+    var span = document.createElement('span');
+    span.setAttribute('data-mini-for', s.id);
+    stepsMini.appendChild(span);
+  });
+
+  function render(){
+    var total = allBoxes.length;
+    var done = allBoxes.filter(function(b){ return b.checked; }).length;
+    document.getElementById('doneCount').textContent = done;
+    document.getElementById('totalCount').textContent = total;
+    var pct = total ? Math.round(done/total*100) : 0;
+    document.getElementById('topFill').style.width = pct + '%';
+    document.getElementById('topPct').textContent = pct + '%';
+
+    STEPS.forEach(function(s){
+      var boxes = document.querySelectorAll('.checklist[data-step="'+s.id+'"] input[type=checkbox]');
+      var t = boxes.length;
+      var d = Array.prototype.filter.call(boxes, function(b){return b.checked;}).length;
+      var p = t ? Math.round(d/t*100) : 0;
+      var railItem = document.querySelector('.rail-item[data-target="step-'+s.id+'"]');
+      var pctLabel = railItem ? railItem.querySelector('[data-pct-for="'+s.id+'"]') : null;
+      if(pctLabel) pctLabel.textContent = p + '%';
+      if(railItem){
+        railItem.classList.toggle('complete', p === 100);
+      }
+      var mini = document.querySelector('[data-mini-for="'+s.id+'"]');
+      if(mini) mini.classList.toggle('done', p === 100);
+    });
+  }
+
+  var sections = STEPS.map(function(s){ return document.getElementById('step-' + s.id); });
+  function onScroll(){
+    var pos = window.scrollY + 140;
+    var activeId = sections[0] ? sections[0].id : null;
+    sections.forEach(function(sec){
+      if(sec && sec.offsetTop <= pos) activeId = sec.id;
+    });
+    document.querySelectorAll('.rail-item').forEach(function(item){
+      item.classList.toggle('active', item.getAttribute('data-target') === activeId);
+    });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    if(!confirm('Clear all checked steps? This cannot be undone.')) return;
+    allBoxes.forEach(function(b){ b.checked = false; });
+    state = {};
+    saveState(state);
+    render();
+  });
+
+  render();
+  onScroll();
+})();
+</script>
+
+</body>
+</html>

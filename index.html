@@ -95,6 +95,26 @@
     align-items:center;
     justify-content: space-between;
   }
+  .primary-nav{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .primary-nav a{
+    color:var(--ink-soft);
+    font-size:12px;
+    font-weight:600;
+    padding:8px 10px;
+    border:1px solid transparent;
+    border-radius:var(--radius);
+    transition: color .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .primary-nav a:hover,
+  .primary-nav a[aria-current="page"]{
+    color:var(--accent);
+    background:var(--accent-soft);
+    border-color:var(--line);
+  }
   .brand{
     display:flex;
     align-items:center;
@@ -374,6 +394,13 @@
     color: var(--muted);
     border-top: 1px solid var(--line);
   }
+  @media (max-width: 760px){
+    .top-inner{ flex-wrap:wrap; gap:14px; padding:16px 20px; }
+    .primary-nav{ order:3; width:100%; justify-content:center; }
+    .header-actions{ margin-left:auto; }
+    main{ padding:50px 20px 72px; }
+    .hero{ margin-bottom:48px; }
+  }
 </style>
 </head>
 <body>
@@ -384,6 +411,11 @@
       <div class="brand-mark">J&amp;R</div>
       <div class="brand-text">Investment Banking — Valuation &amp; Deal Analysis</div>
     </div>
+    <nav class="primary-nav" aria-label="Main navigation">
+      <a href="index.html" aria-current="page">Home</a>
+      <a href="valuation-methodologies.html">Valuation Methods</a>
+      <a href="notes.html">Notes</a>
+    </nav>
     <div class="header-actions">
       <div class="edition-pill">3rd Edition</div>
       <div class="header-socials" aria-label="Social links">
@@ -404,42 +436,42 @@
 
 <main>
   <section class="hero">
-    <div class="kicker">Working Guides for Practitioners</div>
+    <div class="kicker">Valuation Resources · Analyst Reference Desk</div>
     <h1>Investment Banking</h1>
-    <p class="subtitle">Valuation, Leveraged Buyouts, and Mergers &amp; Acquisitions</p>
+    <p class="subtitle">A practical desk for valuation methodologies and technical notes</p>
     <p class="authors">Joshua Rosenbaum &amp; Joshua Pearl · Third Edition</p>
     <div class="divider"></div>
   </section>
 
-  <section class="cards">
-    <a class="card" href="cca.html" style="color:inherit;">
-      <span class="tag">Chapter 1</span>
+  <section class="cards" aria-label="Resource collections">
+    <a class="card" href="valuation-methodologies.html" style="color:inherit;">
+      <span class="tag">Methodologies</span>
       <div class="num">01</div>
-      <h2>Comparable Companies Analysis</h2>
-      <p>A step-by-step working guide to selecting a peer universe, spreading trading multiples, and framing valuation using the public markets.</p>
+      <h2>Valuation Methodologies</h2>
+      <p>Work through the core valuation approaches, with practical guides for public-company comparables and precedent transactions.</p>
       <div class="topics">
-        <span>Peer selection</span>
+        <span>Comparable companies</span>
+        <span>Precedent transactions</span>
         <span>Trading multiples</span>
-        <span>EV / EBITDA</span>
-        <span>Benchmarking</span>
+        <span>Valuation ranges</span>
       </div>
-      <div class="go">Open the guide
+      <div class="go">Explore methodologies
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </div>
     </a>
 
-    <a class="card gold" href="precedent-transactions.html" style="color:inherit;">
-      <span class="tag">Chapter 2</span>
+    <a class="card gold" href="notes.html" style="color:inherit;">
+      <span class="tag">Desk Reference</span>
       <div class="num">02</div>
-      <h2>Precedent Transaction Analysis</h2>
-      <p>Building a precedent transaction analysis from start to finish — screening deals, spreading transaction multiples, and reading control premiums.</p>
+      <h2>Technical Notes</h2>
+      <p>Concise reference material on the assumptions behind valuation, with PDFs available to read in your browser or download.</p>
       <div class="topics">
-        <span>Deal screening</span>
-        <span>Transaction multiples</span>
-        <span>Control premium</span>
-        <span>M&amp;A comps</span>
+        <span>Equity risk premium</span>
+        <span>Beta</span>
+        <span>Cost of equity</span>
+        <span>PDF library</span>
       </div>
-      <div class="go">Open the guide
+      <div class="go">Browse notes
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </div>
     </a>

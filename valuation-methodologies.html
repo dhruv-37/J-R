@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valuation Methodologies — Investment Banking</title>
+<link rel="icon" type="image/png" href="money.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EAEEEA; --paper-2:#F5F7F3; --panel:#FFFFFF; --ink:#1A211C;
+    --ink-soft:#4C574D; --muted:#7B857D; --line:#D3DAD1; --line-soft:#E1E6DD;
+    --accent:#245C4B; --accent-ink:#FFFFFF; --accent-soft:#DCE9E2;
+    --gold:#9C7A32; --gold-soft:#F1E7CE; --shadow:0 1px 2px rgba(20,30,22,.06),0 8px 24px rgba(20,30,22,.05); --radius:3px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--paper:#12160F;--paper-2:#171C15;--panel:#1B211A;--ink:#EAEFE8;--ink-soft:#B7C1B4;--muted:#7F8A7D;--line:#2A322A;--line-soft:#232A21;--accent:#6FBE9F;--accent-ink:#0E1310;--accent-soft:#1F3D33;--gold:#D3B15F;--gold-soft:#332A15;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35)}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent);text-decoration:none}
+  .topbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:13px max(24px,calc((100vw - 1120px)/2));background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .brand{font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:16px;white-space:nowrap}
+  .brand small{font-family:'Inter',sans-serif;font-size:12px;font-weight:400;color:var(--muted);margin-left:8px}
+  nav{display:flex;gap:6px;align-items:center}
+  nav a{font-size:12px;font-weight:600;color:var(--ink-soft);padding:8px 10px;border:1px solid transparent;border-radius:var(--radius)}
+  nav a:hover,nav a[aria-current="page"]{color:var(--accent);background:var(--accent-soft);border-color:var(--line)}
+  main{max-width:1040px;margin:0 auto;padding:68px 28px 90px}
+  .kicker,.eyebrow{font:500 11px 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+  h1,h2{font-family:'Source Serif 4',Georgia,serif;font-weight:600}
+  h1{font-size:clamp(34px,5vw,48px);line-height:1.12;margin:12px 0}
+  .lede{max-width:64ch;color:var(--ink-soft);font-size:16px;margin:0}
+  .section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin:52px 0 18px;border-bottom:1px solid var(--line);padding-bottom:12px}
+  .section-head h2{font-size:24px;margin:0}
+  .section-head span{font:11px 'IBM Plex Mono',monospace;color:var(--muted)}
+  .guides{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+  .guide{position:relative;display:flex;flex-direction:column;min-height:255px;padding:26px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);color:inherit;transition:transform .15s ease,border-color .15s ease}
+  .guide::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--accent)}
+  .guide.gold::before{background:var(--gold)}
+  .guide:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .guide .number{font:12px 'IBM Plex Mono',monospace;color:var(--muted);margin-top:22px}
+  .guide h2{font-size:24px;line-height:1.2;margin:5px 0 10px}
+  .guide p{font-size:14px;color:var(--ink-soft);margin:0 0 24px;max-width:55ch}
+  .guide .open{margin-top:auto;font:600 12px 'IBM Plex Mono',monospace;color:var(--accent)}
+  .guide.gold .open{color:var(--gold)}
+  footer{max-width:1040px;margin:auto;padding:24px 28px 48px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+  @media(max-width:900px){.guides{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:700px){.topbar{flex-wrap:wrap;padding:12px 18px;gap:8px}.brand{width:100%}nav{width:100%;overflow-x:auto}nav a{white-space:nowrap}main{padding:44px 20px 64px}.guides{grid-template-columns:1fr}.section-head{align-items:flex-start;flex-direction:column;gap:4px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">J&amp;R <small>Valuation and Deal Analysis</small></div>
+  <nav aria-label="Main navigation">
+    <a href="index.html">Home</a>
+    <a href="valuation-methodologies.html" aria-current="page">Valuation Methods</a>
+    <a href="notes.html">Notes</a>
+  </nav>
+</header>
+<main>
+  <p class="kicker">Valuation Toolkit / Methods</p>
+  <h1>Valuation Methodologies</h1>
+  <p class="lede">Select a working guide to build an intrinsic or market-based view of value, from forecasting cash flows to interpreting comparable-company and transaction evidence.</p>
+  <div class="section-head">
+    <h2>Working Guides</h2>
+    <span>3 GUIDES</span>
+  </div>
+  <section class="guides" aria-label="Valuation methodology guides">
+    <a class="guide gold" href="dcf.html">
+      <span class="eyebrow">01 / Intrinsic Valuation</span>
+      <span class="number">CASH FLOW MODEL</span>
+      <h2>Discounted Cash Flow Analysis</h2>
+      <p>Forecast free cash flow, estimate terminal value, and discount projected cash flows to derive an intrinsic enterprise value.</p>
+      <span class="open">Open guide&nbsp; →</span>
+    </a>
+    <a class="guide" href="cca.html">
+      <span class="eyebrow">02 / Trading Comparables</span>
+      <span class="number">PUBLIC MARKETS</span>
+      <h2>Comparable Companies Analysis</h2>
+      <p>Select a peer universe, spread trading multiples, and frame a valuation range using public-market evidence.</p>
+      <span class="open">Open guide&nbsp; →</span>
+    </a>
+    <a class="guide" href="precedent-transactions.html">
+      <span class="eyebrow">03 / Transaction Comparables</span>
+      <span class="number">M&amp;A MARKETS</span>
+      <h2>Precedent Transaction Analysis</h2>
+      <p>Screen historical deals, calculate transaction multiples, and interpret control premiums in context.</p>
+      <span class="open">Open guide&nbsp; →</span>
+    </a>
+  </section>
+</main>
+<footer>Investment Banking: Valuation, LBOs, M&amp;A, and IPOs · Joshua Rosenbaum &amp; Joshua Pearl, 3rd Edition</footer>
+</body>
+</html>
